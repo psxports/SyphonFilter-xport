@@ -25,8 +25,10 @@ static sint32 sf_format_write(char *output, FILE *stream, const char *format, va
         const char *string = NULL;
         if (*format != '%')
         {
-            if (output) output[total] = *format;
-            else fputc(*format, stream);
+            if (output)
+                output[total] = *format;
+            else
+                fputc(*format, stream);
             ++total;
             ++format;
             continue;
@@ -34,8 +36,10 @@ static sint32 sf_format_write(char *output, FILE *stream, const char *format, va
         specification[length++] = *format++;
         if (*format == '%')
         {
-            if (output) output[total] = '%';
-            else fputc('%', stream);
+            if (output)
+                output[total] = '%';
+            else
+                fputc('%', stream);
             ++total;
             ++format;
             continue;
@@ -47,8 +51,9 @@ static sint32 sf_format_write(char *output, FILE *stream, const char *format, va
             length += (uint32)sprintf(specification + length, "%d", va_arg(*arguments, sint32));
             ++format;
         }
-        else while (isdigit((unsigned char)*format))
-            specification[length++] = *format++;
+        else
+            while (isdigit((unsigned char)*format))
+                specification[length++] = *format++;
         if (*format == '.')
         {
             specification[length++] = *format++;
@@ -61,11 +66,13 @@ static sint32 sf_format_write(char *output, FILE *stream, const char *format, va
                     --length;
                 ++format;
             }
-            else while (isdigit((unsigned char)*format))
-                specification[length++] = *format++;
+            else
+                while (isdigit((unsigned char)*format))
+                    specification[length++] = *format++;
         }
         /* PsyQ long and int share the same 32-bit carrier */
-        while (*format == 'h' || *format == 'l') ++format;
+        while (*format == 'h' || *format == 'l')
+            ++format;
         conversion = *format++;
         specification[length++] = conversion;
         specification[length] = 0;
@@ -95,18 +102,26 @@ static sint32 sf_format_write(char *output, FILE *stream, const char *format, va
             fprintf(stderr, "Unsupported native PsyQ format conversion %c\n", conversion);
             abort();
         }
-        if (needed < 0) return -1;
+        if (needed < 0)
+            return -1;
         piece = (char *)malloc((size_t)needed + 1u);
-        if (!piece) abort();
-        if (conversion == 's') sprintf(piece, specification, string);
-        else if (strchr("fFeEgG", conversion)) sprintf(piece, specification, real);
-        else sprintf(piece, specification, integer);
-        if (output) memcpy(output + total, piece, (size_t)needed);
-        else fwrite(piece, 1u, (size_t)needed, stream);
+        if (!piece)
+            abort();
+        if (conversion == 's')
+            sprintf(piece, specification, string);
+        else if (strchr("fFeEgG", conversion))
+            sprintf(piece, specification, real);
+        else
+            sprintf(piece, specification, integer);
+        if (output)
+            memcpy(output + total, piece, (size_t)needed);
+        else
+            fwrite(piece, 1u, (size_t)needed, stream);
         total += needed;
         free(piece);
     }
-    if (output) output[total] = 0;
+    if (output)
+        output[total] = 0;
     return total;
 }
 
@@ -115,8 +130,7 @@ sint32 sub_800EC924(uint32 destination, uint32 format, ...)
     sint32 result;
     va_list arguments;
     va_start(arguments, format);
-    result = sf_format_write((char *)sf_draft_guest_ptr(destination), NULL,
-        (const char *)sf_draft_guest_ptr(format), &arguments);
+    result = sf_format_write((char *)sf_draft_guest_ptr(destination), NULL, (const char *)sf_draft_guest_ptr(format), &arguments);
     va_end(arguments);
     return result;
 }

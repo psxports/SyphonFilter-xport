@@ -4,8 +4,7 @@
 uint32 sub_8013F4E0(uint32 mode)
 {
     uint32 offset;
-    if (r_u32(0x8013F4E0u) != 0x27BDFFE8u ||
-        r_u32(0x8013F4F4u) != 0x0C050420u)
+    if (r_u32(0x8013F4E0u) != 0x27BDFFE8u || r_u32(0x8013F4F4u) != 0x0C050420u)
     {
         fprintf(stderr, "MOVIE card init called without its original overlay image\n");
         abort();

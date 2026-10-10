@@ -1,4 +1,5 @@
 #include "game_draft.h"
+#include "../../xport/src/psx_stream.h"
 extern sint32 CdRead(sint32 count, uint32 *destination, sint32 mode);
 extern sint32 CdReadSync(sint32 mode, uint8 *result);
 
@@ -7,6 +8,8 @@ void sf_native_continuation_enter(void);
 void sf_native_continuation_leave(void);
 static uint8 sf_cd_sector[2352];
 static uint32 sf_cd_mode, sf_cd_streaming, sf_cd_polling;
+static uint32 sf_cd_stream_owner;
+void sf_native_cd_set_stream_owner(uint32 enabled);
 static uint32 sf_cd_fifo_offset, sf_cd_sector_ready;
 static uint64 sf_cd_last_us, sf_cd_fraction;
 
@@ -43,16 +46,24 @@ static void sf_cd_ready_dispatch(uint8 status, uint8 *result)
     uint32 arguments[2];
     if (!callback)
         return;
+    if (sf_cd_stream_owner && callback == 0x800F06D8u)
+    {
+        /* The installed canonical hook already performs this SDK stream effect */
+        return;
+    }
     arguments[0] = status;
     arguments[1] = result ? sf_draft_guest_address(result) : 0u;
     sf_draft_call(callback, 2u, arguments);
 }
 
-static void sf_cd_data_dispatch(uint8 status, uint8 *result)
+static void sf_cd_data_dispatch(void)
 {
     /* The original DMA channel callback receives no semantic arguments */
-    (void)status;
-    (void)result;
+    if (sf_cd_stream_owner && sf_cd_data_callback == 0x800F07E4u)
+    {
+        /* Canonical frame completion already owns the SDK DMA completion effect */
+        return;
+    }
     if (sf_cd_data_callback)
         sf_draft_call(sf_cd_data_callback, 0u, NULL);
 }
@@ -61,7 +72,13 @@ uint32 sub_800ED5AC(uint32 callback)
 {
     uint32 previous = r_u32(0x80114CC4u);
     w_u32(0x80114CC4u, callback);
-    CdReadyCallback(callback ? sf_cd_ready_dispatch : NULL);
+    if (sf_cd_stream_owner && callback && callback != 0x800F06D8u)
+    {
+        fprintf(stderr, "Unbound native stream ready callback composition %08X\n", callback);
+        abort();
+    }
+    if (!sf_cd_stream_owner)
+        CdReadyCallback(callback ? sf_cd_ready_dispatch : NULL);
     return previous;
 }
 
@@ -69,15 +86,39 @@ uint32 sub_800ED9DC(uint32 callback)
 {
     uint32 previous = sf_cd_data_callback;
     sf_cd_data_callback = callback;
-    CdDataCallback(callback ? sf_cd_data_dispatch : NULL);
+    if (sf_cd_stream_owner && callback && callback != 0x800F07E4u)
+    {
+        fprintf(stderr, "Unbound native stream data callback composition %08X\n", callback);
+        abort();
+    }
+    if (!sf_cd_stream_owner)
+        CdDataCallback(callback ? sf_cd_data_dispatch : NULL);
     return previous;
+}
+
+void sf_native_cd_set_stream_owner(uint32 enabled)
+{
+    if (enabled)
+    {
+        sf_cd_stream_owner = 1u;
+        sf_cd_sector_ready = 0u;
+        return;
+    }
+    if (!sf_cd_stream_owner)
+        return;
+    StUnSetRing();
+    sf_cd_stream_owner = 0u;
+    sf_cd_sector_ready = 0u;
+    sf_cd_last_us = xport_timer_get();
+    sf_cd_fraction = 0u;
+    CdReadyCallback(r_u32(0x80114CC4u) ? sf_cd_ready_dispatch : NULL);
+    CdDataCallback(sf_cd_data_callback ? sf_cd_data_dispatch : NULL);
 }
 
 sint32 sub_800ED5C0(uint8 command, sint32 parameter, sint32 result)
 {
     uint8 *parameters = parameter ? (uint8 *)sf_draft_guest_ptr((uint32)parameter) : NULL;
-    sint32 completed = CdControl(command, parameters,
-        result ? (uint8 *)sf_draft_guest_ptr((uint32)result) : NULL);
+    sint32 completed = CdControl(command, parameters, result ? (uint8 *)sf_draft_guest_ptr((uint32)result) : NULL);
     if (completed)
         sf_cd_command_complete(command, parameters);
     return completed;
@@ -99,6 +140,7 @@ uint32 sub_800F0384(sint32 count, uint32 destination, sint32 mode)
         fprintf(stderr, "Unsupported original 582-word CD read mode %08X\n", (uint32)mode);
         abort();
     }
+    sf_native_cd_set_stream_owner(0u);
     sf_cd_streaming = 0u;
     sf_cd_sector_ready = 0u;
     return (uint32)CdRead(count, (uint32 *)sf_draft_guest_ptr(destination), mode);
@@ -110,6 +152,12 @@ sint32 sub_800F0520(sint32 mode, uint32 result)
 }
 
 extern sint32 CD_getsector(uint32 destination, uint32 words);
+
+void sf_native_cd_reset_data_fifo(void)
+{
+    /* Reset only the current private sector payload cursor */
+    sf_cd_fifo_offset = (sf_cd_mode & 0x20u) ? 12u : 24u;
+}
 
 sint32 sf_native_cd_get_sector(uint32 destination, uint32 words)
 {
@@ -141,7 +189,7 @@ sint32 sf_native_cd_get_sector(uint32 destination, uint32 words)
     if (copied && sf_cd_data_callback)
     {
         sf_native_continuation_enter();
-        sf_draft_call(sf_cd_data_callback, 0u, NULL);
+        sf_cd_data_dispatch();
         sf_native_continuation_leave();
     }
     return copied;
@@ -151,7 +199,7 @@ void sf_native_cd_poll(void)
 {
     uint64 now, elapsed, due;
     uint32 rate;
-    if (!sf_cd_streaming || sf_cd_polling)
+    if (sf_cd_stream_owner || !sf_cd_streaming || sf_cd_polling)
         return;
     sf_native_continuation_enter();
     sf_cd_polling = 1u;
@@ -163,15 +211,18 @@ void sf_native_cd_poll(void)
     sf_cd_fraction += elapsed % 1000000u * rate;
     due += sf_cd_fraction / 1000000u;
     sf_cd_fraction %= 1000000u;
-    while (due && sf_cd_streaming)
+    while (due && sf_cd_streaming && !sf_cd_stream_owner)
     {
         uint32 callback, arguments[2], index, status;
         --due;
-        if (!cd_read_sector_native(sf_cd_sector))
+        sint32 sector_result = cd_read_sector_native(sf_cd_sector);
+        if (sector_result < 0)
         {
             fprintf(stderr, "Native streaming CD sector read failed\n");
             abort();
         }
+        if (sector_result == 0)
+            break;
         sf_cd_sector_ready = 1u;
         sf_cd_fifo_offset = (sf_cd_mode & 0x20u) ? 12u : 24u;
         /* Successful ReadN or ReadS owns motor-on and reading status */

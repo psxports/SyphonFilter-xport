@@ -63,16 +63,14 @@ static void sf_sprite_project(uint32 matrix[8], const sint16 corners[4][3], uint
         xport_gte_write_control(5u + i, matrix[5u + i]);
     for (i = 0; i < 3u; ++i)
     {
-        sf_gte_write_data(2u * i, (uint32)(uint16)corners[i][0] |
-            ((uint32)(uint16)corners[i][1] << 16));
+        sf_gte_write_data(2u * i, (uint32)(uint16)corners[i][0] | ((uint32)(uint16)corners[i][1] << 16));
         sf_gte_write_data(2u * i + 1u, (uint32)(uint16)corners[i][2]);
     }
     sf_gte_execute(0x280030u);
     xy[0] = sf_gte_read_data(12u);
     xy[1] = sf_gte_read_data(13u);
     xy[2] = sf_gte_read_data(14u);
-    sf_gte_write_data(0u, (uint32)(uint16)corners[3][0] |
-        ((uint32)(uint16)corners[3][1] << 16));
+    sf_gte_write_data(0u, (uint32)(uint16)corners[3][0] | ((uint32)(uint16)corners[3][1] << 16));
     sf_gte_write_data(1u, (uint32)(uint16)corners[3][2]);
     sf_gte_execute(0x180001u);
     xy[3] = sf_gte_read_data(14u);
@@ -99,22 +97,15 @@ void sub_800E82B4(sint32 source, sint32 ordering_table, uint16 depth)
     packet = r_u32(0x8012C8A0u);
     scale = r_u32(sprite + 28u);
     rotation = r_u32(sprite + 32u);
-    command = ((flags >> 5) & 0x02000000u) |
-        ((flags << 18) & 0x01000000u) |
-        ((uint32)r_u8(sprite + 22u) << 16) |
-        ((uint32)r_u8(sprite + 21u) << 8) | r_u8(sprite + 20u);
-    texture = r_u8(sprite + 14u) | ((uint32)r_u8(sprite + 15u) << 8) |
-        ((uint32)(sint32)r_s16(sprite + 18u) << 22) |
-        (((uint32)(sint32)r_s16(sprite + 16u) << 12) & 0x003F0000u);
+    command = ((flags >> 5) & 0x02000000u) | ((flags << 18) & 0x01000000u) | ((uint32)r_u8(sprite + 22u) << 16) | ((uint32)r_u8(sprite + 21u) << 8) | r_u8(sprite + 20u);
+    texture = r_u8(sprite + 14u) | ((uint32)r_u8(sprite + 15u) << 8) | ((uint32)(sint32)r_s16(sprite + 18u) << 22) | (((uint32)(sint32)r_s16(sprite + 16u) << 12) & 0x003F0000u);
     pivot_x = r_s16(sprite + 24u);
     pivot_y = r_s16(sprite + 26u);
-    if ((flags & 0x08000000u) ||
-        (scale == 0x10001000u && !rotation && !(flags & 0x00C00000u)))
+    if ((flags & 0x08000000u) || (scale == 0x10001000u && !rotation && !(flags & 0x00C00000u)))
     {
         sint32 x = r_s16(sprite + 4u) + r_s16(0x8012F9F8u) - pivot_x;
         sint32 y = r_s16(sprite + 6u) + r_s16(0x8012F9FAu) - pivot_y;
-        w_u32(packet + 4u, 0xE1000200u | (r_u16(sprite + 12u) & 31u) |
-            ((flags >> 17) & 0x180u) | ((flags >> 23) & 0x60u));
+        w_u32(packet + 4u, 0xE1000200u | (r_u16(sprite + 12u) & 31u) | ((flags >> 17) & 0x180u) | ((flags >> 23) & 0x60u));
         w_u32(packet + 8u, command | 0x64000000u);
         w_u32(packet + 12u, (uint32)(uint16)x | ((uint32)y << 16));
         w_u32(packet + 16u, texture);
@@ -144,17 +135,23 @@ void sub_800E82B4(sint32 source, sint32 ordering_table, uint16 depth)
         u1 = (uint8)(u0 + r_u8(sprite + 8u) - 1u);
         v0 = r_u8(sprite + 15u);
         v1 = (uint8)(v0 + r_u8(sprite + 10u) - 1u);
-        if (flags & 0x00800000u) { uint8 temporary = u0; u0 = u1; u1 = temporary; }
-        if (flags & 0x00400000u) { uint8 temporary = v0; v0 = v1; v1 = temporary; }
+        if (flags & 0x00800000u)
+        {
+            uint8 temporary = u0;
+            u0 = u1;
+            u1 = temporary;
+        }
+        if (flags & 0x00400000u)
+        {
+            uint8 temporary = v0;
+            v0 = v1;
+            v1 = temporary;
+        }
         w_u32(packet + 4u, command | 0x2C000000u);
         w_u32(packet + 8u, xy[0]);
-        w_u32(packet + 12u, u0 | ((uint32)v0 << 8) |
-            ((uint32)(sint32)r_s16(sprite + 18u) << 22) |
-            (((uint32)(sint32)r_s16(sprite + 16u) << 12) & 0x003F0000u));
+        w_u32(packet + 12u, u0 | ((uint32)v0 << 8) | ((uint32)(sint32)r_s16(sprite + 18u) << 22) | (((uint32)(sint32)r_s16(sprite + 16u) << 12) & 0x003F0000u));
         w_u32(packet + 16u, xy[1]);
-        w_u32(packet + 20u, u1 | ((uint32)v0 << 8) |
-            ((r_u16(sprite + 12u) & 31u) << 16) |
-            ((flags >> 1) & 0x01800000u) | ((flags >> 7) & 0x00600000u));
+        w_u32(packet + 20u, u1 | ((uint32)v0 << 8) | ((r_u16(sprite + 12u) & 31u) << 16) | ((flags >> 1) & 0x01800000u) | ((flags >> 7) & 0x00600000u));
         w_u32(packet + 24u, xy[2]);
         w_u32(packet + 28u, u0 | ((uint32)v1 << 8));
         w_u32(packet + 32u, xy[3]);
@@ -226,7 +223,6 @@ void sub_800EB7A4(uint32 matrix)
     xport_gte_write_control(7u, z);
 }
 
-
 void sf_native_graphics_bind_software_gpu(void)
 {
     if (sf_software_gpu_active)
@@ -246,8 +242,7 @@ void sf_native_draw_otag(uint32 ordering_table)
     }
     sf_software_gpu_active = 1u;
     DrawOTag((uint32 *)sf_draft_guest_ptr(ordering_table));
-    if (gpu_transfer_observation_failed() || gpu_linked_submit_failed() ||
-        xport_memory_error() != XPORT_MEMORY_ERROR_NONE)
+    if (gpu_transfer_observation_failed() || gpu_linked_submit_failed() || xport_memory_error() != XPORT_MEMORY_ERROR_NONE)
     {
         fprintf(stderr, "SF: Native ordering table submission failed at %08X\n", ordering_table);
         abort();

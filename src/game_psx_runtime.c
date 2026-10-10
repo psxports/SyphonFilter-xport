@@ -5,6 +5,11 @@ static uint32 sf_gte_lzcs;
 static uint32 sf_gte_lzcr = 32u;
 static uint32 sf_gte_reserved;
 
+uint32 sf_gte_color_02(void)
+{
+    return (uint16)gte.color.m[0][2];
+}
+
 sint32 sf_gte_import_snapshot(const PsxGteSnapshot *state)
 {
     if (!state)
@@ -76,20 +81,30 @@ uint32 sf_gte_read_data(uint32 index)
     if (index < 6u)
     {
         const sint16 *vector = index < 2u ? gte.v0 : index < 4u ? gte.v1 : gte.v2;
-        return index & 1u ? (uint32)(sint32)vector[2]
-            : (uint16)vector[0] | ((uint32)(uint16)vector[1] << 16);
+        return index & 1u ? (uint32)(sint32)vector[2] : (uint16)vector[0] | ((uint32)(uint16)vector[1] << 16);
     }
-    if (index == 6u) return gte.rgbc;
-    if (index == 7u) return gte.otz;
-    if (index == 8u) return (uint32)(sint32)(sint16)gte.ir0;
-    if (index < 12u) return (uint32)(sint32)(sint16)gte.ir[index - 9u];
-    if (index < 15u) return (uint32)gte.sxy[index - 12u];
-    if (index == 15u) return (uint32)gte.sxy[2];
-    if (index < 20u) return gte.sz[index - 16u];
-    if (index < 23u) return gte.rgb[index - 20u];
-    if (index == 23u) return sf_gte_reserved;
-    if (index == 24u) return (uint32)gte.mac0;
-    if (index < 28u) return (uint32)gte.mac[index - 25u];
+    if (index == 6u)
+        return gte.rgbc;
+    if (index == 7u)
+        return gte.otz;
+    if (index == 8u)
+        return (uint32)(sint32)(sint16)gte.ir0;
+    if (index < 12u)
+        return (uint32)(sint32)(sint16)gte.ir[index - 9u];
+    if (index < 15u)
+        return (uint32)gte.sxy[index - 12u];
+    if (index == 15u)
+        return (uint32)gte.sxy[2];
+    if (index < 20u)
+        return gte.sz[index - 16u];
+    if (index < 23u)
+        return gte.rgb[index - 20u];
+    if (index == 23u)
+        return sf_gte_reserved;
+    if (index == 24u)
+        return (uint32)gte.mac0;
+    if (index < 28u)
+        return (uint32)gte.mac[index - 25u];
     if (index < 30u)
     {
         uint32 color = 0u;
@@ -97,8 +112,10 @@ uint32 sf_gte_read_data(uint32 index)
         for (component = 0; component < 3u; ++component)
         {
             sint32 value = gte.ir[component] >> 7;
-            if (value < 0) value = 0;
-            if (value > 31) value = 31;
+            if (value < 0)
+                value = 0;
+            if (value > 31)
+                value = 31;
             color |= (uint32)value << (component * 5u);
         }
         return color;
@@ -109,11 +126,12 @@ uint32 sf_gte_read_data(uint32 index)
 static sint64 sf_gte_accumulate(uint32 row, sint64 value)
 {
     uint64 wrapped;
-    if (value > 0x7ffffffffffLL) gte.flag |= (sint32)(1u << (30u - row));
-    if (value < -0x80000000000LL) gte.flag |= (sint32)(1u << (27u - row));
+    if (value > 0x7ffffffffffLL)
+        gte.flag |= (sint32)(1u << (30u - row));
+    if (value < -0x80000000000LL)
+        gte.flag |= (sint32)(1u << (27u - row));
     wrapped = (uint64)value & 0xfffffffffffULL;
-    return (sint64)(wrapped & 0x7ffffffffffULL)
-        - ((wrapped & 0x80000000000ULL) ? 0x80000000000LL : 0LL);
+    return (sint64)(wrapped & 0x7ffffffffffULL) - ((wrapped & 0x80000000000ULL) ? 0x80000000000LL : 0LL);
 }
 
 static void sf_gte_project(const sint16 vertex[3], uint32 cue)
@@ -133,7 +151,8 @@ static void sf_gte_project(const sint16 vertex[3], uint32 cue)
     }
     depth = clamp_sz(gte.mac[2]);
     quotient = (!depth || (uint32)gte.h >= depth * 2u) ? 0x1ffffu : gte_unr_divide((uint32)gte.h, depth);
-    if (!depth || (uint32)gte.h >= depth * 2u) gte.flag |= 1u << 17;
+    if (!depth || (uint32)gte.h >= depth * 2u)
+        gte.flag |= 1u << 17;
     for (row = 0; row < 2u; ++row)
     {
         sint64 value = (sint64)gte.ir[row] * quotient + (sint64)(row ? gte.ofy : gte.ofx) * 65536;
@@ -143,15 +162,25 @@ static void sf_gte_project(const sint16 vertex[3], uint32 cue)
     gte.sxy[0] = gte.sxy[1];
     gte.sxy[1] = gte.sxy[2];
     gte.sxy[2] = (sint32)((uint16)screen[0] | ((uint32)(uint16)screen[1] << 16));
-    gte.sz[0] = gte.sz[1]; gte.sz[1] = gte.sz[2];
-    gte.sz[2] = gte.sz[3]; gte.sz[3] = depth;
+    gte.sz[0] = gte.sz[1];
+    gte.sz[1] = gte.sz[2];
+    gte.sz[2] = gte.sz[3];
+    gte.sz[3] = depth;
     if (cue)
     {
         sint64 value = (sint64)gte.dqa * quotient + gte.dqb;
         sint64 ir0 = value >> 12;
         gte.mac0 = truncate_mac0(value);
-        if (ir0 < 0) { ir0 = 0; gte.flag |= 1u << 12; }
-        if (ir0 > 4096) { ir0 = 4096; gte.flag |= 1u << 12; }
+        if (ir0 < 0)
+        {
+            ir0 = 0;
+            gte.flag |= 1u << 12;
+        }
+        if (ir0 > 4096)
+        {
+            ir0 = 4096;
+            gte.flag |= 1u << 12;
+        }
         gte.ir0 = (sint32)ir0;
     }
 }
@@ -200,7 +229,9 @@ sint32 sf_gte_execute(uint32 command)
     gte.flag = 0;
     switch (command)
     {
-        case 0x180001u: sf_gte_project(gte.v0, 1u); break;
+        case 0x180001u:
+            sf_gte_project(gte.v0, 1u);
+            break;
         case 0x280030u:
             sf_gte_project(gte.v0, 0u);
             sf_gte_project(gte.v1, 0u);
@@ -210,24 +241,33 @@ sint32 sf_gte_execute(uint32 command)
             NormalClip(gte.sxy[0], gte.sxy[1], gte.sxy[2]);
             break;
         case 0xa00428u:
-            input.vx = gte.ir[0]; input.vy = gte.ir[1]; input.vz = gte.ir[2];
+            input.vx = gte.ir[0];
+            input.vy = gte.ir[1];
+            input.vz = gte.ir[2];
             Square0(&input, &output);
             break;
         case 0x190003du:
-            vector.vx = (sint16)gte.ir[0]; vector.vy = (sint16)gte.ir[1]; vector.vz = (sint16)gte.ir[2]; vector.pad = 0;
+            vector.vx = (sint16)gte.ir[0];
+            vector.vy = (sint16)gte.ir[1];
+            vector.vz = (sint16)gte.ir[2];
+            vector.pad = 0;
             gte_gpf0(&vector, gte.ir0, &output);
             break;
-        case 0xe80413u: sf_gte_normal_depth(gte.v0); break;
+        case 0xe80413u:
+            sf_gte_normal_depth(gte.v0);
+            break;
         case 0xf80416u:
             sf_gte_normal_depth(gte.v0);
             sf_gte_normal_depth(gte.v1);
             sf_gte_normal_depth(gte.v2);
             break;
+        case 0x406012u:
         case 0x41e012u:
         {
             sint16 values[3];
             uint32 row;
-            for (row = 0; row < 3u; ++row) values[row] = (sint16)gte.ir[row];
+            for (row = 0; row < 3u; ++row)
+                values[row] = command == 0x406012u ? (sint16)gte.v0[row] : (sint16)gte.ir[row];
             for (row = 0; row < 3u; ++row)
             {
                 uint32 col;

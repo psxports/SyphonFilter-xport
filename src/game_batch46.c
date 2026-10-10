@@ -1,8 +1,8 @@
 #include "game_draft.h"
 
 sint32 sub_8013E83C(void);
-sint32 sub_8013E9D0(sint32 enabled);
-sint32 sub_8013EC6C(sint32 enabled);
+void sub_8013E9D0(sint32 enabled);
+uint32 sub_8013EC6C(uint32 source);
 
 sint32 sub_8013E8F4(void)
 {
@@ -10,7 +10,7 @@ sint32 sub_8013E8F4(void)
     /* TODO Integrate remaining MOVIE service dependencies */
     if (r_u8(0x80141A20u))
     {
-        sub_8013E83C();
+        sf_movie_pause_before_dispose(r_u32(0x801419E0u));
         sub_800F0764();
         sub_8013E9D0(0);
         sub_8013EC6C(0);

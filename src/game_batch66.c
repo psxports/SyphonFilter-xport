@@ -9,6 +9,7 @@ sint32 sub_80091AEC(sint16 entity)
 {
     return sub_80091AF0(entity, r_u8(SF_DRAFT_GP + 0xBDCu));
 }
+
 #include <stdlib.h>
 
 uint32 sub_8006C0BC(sint32 mode, uint32 channel, sint32 entity, uint32 left_output, uint32 right_output)
@@ -17,8 +18,7 @@ uint32 sub_8006C0BC(sint32 mode, uint32 channel, sint32 entity, uint32 left_outp
     return (uint32)sub_8006B90C(mode, channel, entity, 0u, left_output, right_output);
 }
 
-sint32 sub_8001D494(uint8 mode, sint32 a1, sint32 a2, sint32 a3,
-    sint32 extra16, sint32 extra20, sint32 extra24, uint8 flag28)
+sint32 sub_8001D494(uint8 mode, sint32 a1, sint32 a2, sint32 a3, sint32 extra16, sint32 extra20, sint32 extra24, uint8 flag28)
 {
     FUNCTION_MARKER(0x8001D494u, "SCUS_942.40");
     return sub_8001D384(12, a1, a2, a3, extra16, extra20, extra24, mode, flag28);
@@ -57,16 +57,20 @@ sint32 sub_8006CB74(uint32 data, sint32 parameter)
     FUNCTION_MARKER(0x8006CB74u, "SCUS_942.40");
     while ((sint16)r_u16(data + 4u + index * 2u) != -1)
     {
-        if (index >= 4u) break;
-        if (!(r_u32(data) & (1u << index))) choices[count++] = index;
+        if (index >= 4u)
+            break;
+        if (!(r_u32(data) & (1u << index)))
+            choices[count++] = index;
         ++index;
     }
     random = (sint32)sub_800EC8F4();
-    if (!count) _break(7u, 0u);
+    if (!count)
+        _break(7u, 0u);
     choice = choices[random % (sint32)count];
     w_u32(data, r_u32(data) | (1u << choice));
     result = sub_8006C620((uint32)(sint32)(sint16)r_u16(data + 4u + choice * 2u), parameter, 0);
-    if (count == 1u) w_u32(data, 0u);
+    if (count == 1u)
+        w_u32(data, 0u);
     return result;
 }
 
@@ -82,7 +86,8 @@ sint32 sub_80027D3C(void)
     FUNCTION_MARKER(0x80027D3Cu, "SCUS_942.40");
     sub_8006C7CC();
     sub_8006CB54(0x8010B548u);
-    if (!r_u8(0x80116944u)) return 0;
+    if (!r_u8(0x80116944u))
+        return 0;
     payload = r_u32(0x80116AB0u);
     return (sint32)sub_80015364(44u, 4u, (sint32)payload, (sint32)payload, 0, 0, 0, 0);
 }
@@ -97,7 +102,8 @@ uint32 sub_800DF43C(uint32 context)
     uint32 callback;
     FUNCTION_MARKER(0x800DF43Cu, "SCUS_942.40");
     callback = r_u32(0x80116614u);
-    if (!callback) return 0u;
+    if (!callback)
+        return 0u;
     return sf_draft_call(callback, 1u, &context);
 }
 
@@ -106,7 +112,8 @@ sint32 sub_8014D4F4(sint16 offset)
     uint32 index;
     uint32 x;
     FUNCTION_MARKER(0x8014D4F4u, "INIT.DEP.OVL");
-    if (r_u32(0x80116984u) != 6u) return 6;
+    if (r_u32(0x80116984u) != 6u)
+        return 6;
     x = (uint16)((uint32)(sint32)offset - 50u);
     for (index = 0u; index < 3u; ++index)
     {
@@ -124,7 +131,8 @@ sint32 sub_800D92F0(sint32 value, sint32 period, uint32 output)
     sint32 current;
     FUNCTION_MARKER(0x800D92F0u, "SCUS_942.40");
     *remainder = value;
-    if (!period) return 1;
+    if (!period)
+        return 1;
     if (value < 0)
         *remainder = (sint32)((uint32)value + (uint32)period);
     else if (value >= period)
@@ -155,8 +163,7 @@ sint32 sf_native_get_table(sint32 *address, sint32 *count, uint32 *flags)
 sint32 sub_800932AC(uint32 address, uint32 count, uint32 flags)
 {
     FUNCTION_MARKER(0x800932ACu, "SCUS_942.40.DEP");
-    return sf_native_get_table(SF_DRAFT_PTR(sint32, address),
-        SF_DRAFT_PTR(sint32, count), flags ? SF_DRAFT_PTR(uint32, flags) : NULL);
+    return sf_native_get_table(SF_DRAFT_PTR(sint32, address), SF_DRAFT_PTR(sint32, count), flags ? SF_DRAFT_PTR(uint32, flags) : NULL);
 }
 
 sint32 sf_native_movie_input(sint32 mode, sint32 *event, sint32 *value)
@@ -164,7 +171,8 @@ sint32 sf_native_movie_input(sint32 mode, sint32 *event, sint32 *value)
     sint32 pending;
     sint32 initial_value;
     sint32 initial = (sint32)r_u32(0x80142A3Cu);
-    if (!initial && !r_u32(0x80142A44u)) return -1;
+    if (!initial && !r_u32(0x80142A44u))
+        return -1;
     initial = (sint32)r_u32(0x80142A3Cu);
     initial_value = (sint32)r_u32(0x80142A40u);
     pending = (sint32)r_u32(0x80142A44u);
@@ -172,26 +180,31 @@ sint32 sf_native_movie_input(sint32 mode, sint32 *event, sint32 *value)
     {
         while (!r_u32(0x80142A44u))
         {
-            xport_poll();
-            if (xport_isquit()) return -1;
+            /* Service original asynchronous interrupts during the native wait */
+            psx_native_poll_events();
+            if (xport_isquit())
+                return -1;
         }
         pending = 1;
     }
     if (pending)
     {
-        if (value) *value = (sint32)r_u32(0x80142A88u);
-        if (event) *event = (sint32)r_u32(0x80142A84u);
+        if (value)
+            *value = (sint32)r_u32(0x80142A88u);
+        if (event)
+            *event = (sint32)r_u32(0x80142A84u);
         w_u32(0x80142A44u, 0u);
         return 1;
     }
-    if (value) *value = initial_value;
-    if (event) *event = initial;
+    if (value)
+        *value = initial_value;
+    if (event)
+        *event = initial;
     return 0;
 }
 
 sint32 sub_801406FC(sint32 mode, uint32 event, uint32 value)
 {
     FUNCTION_MARKER(0x801406FCu, "MOVIE.EXTRA.OVL");
-    return sf_native_movie_input(mode, event ? SF_DRAFT_PTR(sint32, event) : NULL,
-        value ? SF_DRAFT_PTR(sint32, value) : NULL);
+    return sf_native_movie_input(mode, event ? SF_DRAFT_PTR(sint32, event) : NULL, value ? SF_DRAFT_PTR(sint32, value) : NULL);
 }

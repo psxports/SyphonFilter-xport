@@ -73,5 +73,5 @@ uint32 sub_800EF304(uint32 destination, uint32 filename)
     const char *path = SF_DRAFT_PTR(const char, filename);
     if (!output || !path)
         return 0u;
-    return CdSearchFilePSX(output, path) ? destination : 0u;
+    return CdSearchFile((CdlFILE *)output, path) ? destination : 0u;
 }

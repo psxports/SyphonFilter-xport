@@ -38,15 +38,13 @@ sint32 sub_800EA474(sint32 angle)
 
 sint32 sub_800E7F14(sint8 depth, sint8 blend, sint16 x, sint16 y)
 {
-    return ((depth & 3) << 7) | ((blend & 3) << 5) |
-        ((y & 0x100) >> 4) | ((x & 0x3FF) >> 6) | ((y & 0x200) << 2);
+    return ((depth & 3) << 7) | ((blend & 3) << 5) | ((y & 0x100) >> 4) | ((x & 0x3FF) >> 6) | ((y & 0x200) << 2);
 }
 
 sint32 sub_800E7F94(sint32 packet, sint32 dither, sint32 draw_display, sint16 page)
 {
     uint8 *bytes = SF_DRAFT_PTR(uint8, packet);
-    uint32 command = 0xE1000000u | (draw_display ? 0x200u : 0u) |
-        ((uint32)page & 0x9FFu) | (dither ? 0x400u : 0u);
+    uint32 command = 0xE1000000u | (draw_display ? 0x200u : 0u) | ((uint32)page & 0x9FFu) | (dither ? 0x400u : 0u);
     bytes[3] = 1u;
     xport_store_le32(bytes + 4u, command);
     return (sint32)command;
@@ -69,8 +67,12 @@ uint32 sub_800EADF4(uint32 matrix, uint32 input, uint32 output)
     uint32 *result = SF_DRAFT_PTR(uint32, output);
     uint32 high[3], low[3], high_mac[3];
     uint32 index;
-    for (index = 0u; index < 5u; ++index)
+    uint16 r22;
+    for (index = 0u; index < 4u; ++index)
         xport_gte_write_control(index, rotation[index]);
+    /* GTE control four consumes R22 and ignores native matrix padding */
+    memcpy(&r22, (const uint8 *)rotation + 16u, sizeof(r22));
+    xport_gte_write_control(4u, (uint32)r22);
     for (index = 0u; index < 3u; ++index)
     {
         sint32 value = vector[index];
@@ -243,16 +245,12 @@ sint32 sub_800EC124(sint32 y, sint32 x)
         return 0;
     if (y < x)
     {
-        index = ((uint32)y & 0x7FE00000u) ?
-            sf_native_checked_divide(y, x >> 10) :
-            sf_native_checked_divide((sint32)((uint32)y << 10), x);
+        index = ((uint32)y & 0x7FE00000u) ? sf_native_checked_divide(y, x >> 10) : sf_native_checked_divide((sint32)((uint32)y << 10), x);
         angle = r_s16(0x801143F8u + (uint32)index * 2u);
     }
     else
     {
-        index = ((uint32)x & 0x7FE00000u) ?
-            sf_native_checked_divide(x, y >> 10) :
-            sf_native_checked_divide((sint32)((uint32)x << 10), y);
+        index = ((uint32)x & 0x7FE00000u) ? sf_native_checked_divide(x, y >> 10) : sf_native_checked_divide((sint32)((uint32)x << 10), y);
         angle = (sint32)(1024u - (uint32)(sint32)r_s16(0x801143F8u + (uint32)index * 2u));
     }
     if (negative_x)
@@ -272,8 +270,7 @@ uint32 sub_800E9C44(uint16 offset, uint16 point, uint32 descriptor)
     if (r_u8(0x8010F41Au) >= 2u)
         fprintf(stderr, "ClearOTagR(%08x,%d)...\n", ordering_table, 1u << (table[0] & 31u));
     sf_native_graphics_require_idle();
-    ClearOTagR(SF_DRAFT_PTR(uint32, ordering_table),
-        (sint32)(1u << (table[0] & 31u)));
+    ClearOTagR(SF_DRAFT_PTR(uint32, ordering_table), (sint32)(1u << (table[0] & 31u)));
     /* Preserve the SDK header after the synchronous reverse-link operation */
     w_u32(0x8010F4D8u, 0x0410F4C4u);
     w_u32(ordering_table, 0x0010F4D8u);
@@ -324,17 +321,10 @@ void sub_800E87B4(sint32 source, sint32 ordering_table, uint16 depth)
     if ((sint32)flags < 0 || !r_u16(primitive + 8u) || !r_u16(primitive + 10u))
         return;
     packet = r_u32(0x8012C8A0u);
-    w_u32(packet + 4u, 0xE1000200u | (r_u16(primitive + 12u) & 31u) |
-        ((flags >> 17) & 0x180u) | ((flags >> 23) & 0x60u));
-    w_u32(packet + 12u, (uint32)(uint16)(r_u16(primitive + 4u) + r_u16(0x8012F9F8u)) |
-        ((uint32)(r_u16(primitive + 6u) + r_u16(0x8012F9FAu)) << 16));
-    w_u32(packet + 8u, ((flags >> 5) & 0x02000000u) |
-        ((flags << 18) & 0x01000000u) | 0x64000000u |
-        ((uint32)r_u8(primitive + 22u) << 16) |
-        ((uint32)r_u8(primitive + 21u) << 8) | r_u8(primitive + 20u));
-    w_u32(packet + 16u, r_u8(primitive + 14u) | ((uint32)r_u8(primitive + 15u) << 8) |
-        ((uint32)(sint32)r_s16(primitive + 18u) << 22) |
-        (((uint32)(sint32)r_s16(primitive + 16u) << 12) & 0x003F0000u));
+    w_u32(packet + 4u, 0xE1000200u | (r_u16(primitive + 12u) & 31u) | ((flags >> 17) & 0x180u) | ((flags >> 23) & 0x60u));
+    w_u32(packet + 12u, (uint32)(uint16)(r_u16(primitive + 4u) + r_u16(0x8012F9F8u)) | ((uint32)(r_u16(primitive + 6u) + r_u16(0x8012F9FAu)) << 16));
+    w_u32(packet + 8u, ((flags >> 5) & 0x02000000u) | ((flags << 18) & 0x01000000u) | 0x64000000u | ((uint32)r_u8(primitive + 22u) << 16) | ((uint32)r_u8(primitive + 21u) << 8) | r_u8(primitive + 20u));
+    w_u32(packet + 16u, r_u8(primitive + 14u) | ((uint32)r_u8(primitive + 15u) << 8) | ((uint32)(sint32)r_s16(primitive + 18u) << 22) | (((uint32)(sint32)r_s16(primitive + 16u) << 12) & 0x003F0000u));
     w_u32(packet + 20u, r_u16(primitive + 8u) | ((uint32)r_u16(primitive + 10u) << 16));
     table = SF_DRAFT_PTR(uint32, ordering_table);
     link = table[1] + (uint32)depth * 4u - table[2] * 4u;
@@ -384,17 +374,27 @@ static void sf_update_geometry_origin(void)
 }
 
 extern sint32 sf_native_video_bind(const PsxCrtcState *initial, uint32 status);
-extern sint32 sf_native_video_configure(uint32 hstart, uint32 hend,
-    uint32 vstart, uint32 vend, uint32 interlace);
+extern sint32 sf_native_video_configure(uint32 hstart, uint32 hend, uint32 vstart, uint32 vend, uint32 interlace);
 extern void sf_native_video_poll(void);
 static uint32 sf_video_initialized;
 static uint32 sf_video_pal;
+static uint32 sf_card_poll_field;
+
+static sint32 sf_native_guest_callback(void *context, uint32 target)
+{
+    sf_draft_call(target, 0u, NULL);
+    return 1;
+}
 
 static sint32 sf_native_video_callback(void *context, uint32 target)
 {
-    (void)context;
-    sf_draft_call(target, 0u, NULL);
-    return 1;
+    /* The first delivered callback retains the BIOS interrupt and callback gates */
+    if (sf_card_poll_field != r_u32(0x8010F378u))
+    {
+        sf_card_poll_field = r_u32(0x8010F378u);
+        psx_bios_card_poll();
+    }
+    return sf_native_guest_callback(context, target);
 }
 
 static sint32 sf_native_clamp(sint32 value, sint32 low, sint32 high)
@@ -437,9 +437,8 @@ void sf_native_update_video(const DISPENV *display)
         memset(sf_draft_guest_ptr(0x8010F358u), 0, 32u);
         psx_vblank_bind(NULL, NULL, 0u);
         VSyncCallback(NULL);
-        if (!sf_native_video_bind(&profile, interlace << 22) ||
-            !psx_vblank_bind_guest(0x8010F378u, 0x8010F358u,
-                sf_native_video_callback, NULL))
+        sf_card_poll_field = 0u;
+        if (!sf_native_video_bind(&profile, interlace << 22) || !psx_vblank_bind_guest(0x8010F378u, 0x8010F358u, sf_native_video_callback, NULL))
             abort();
         sf_video_pal = pal;
         sf_video_initialized = 1u;
@@ -451,8 +450,7 @@ void sf_native_update_video(const DISPENV *display)
             fprintf(stderr, "Native video standard change needs clock reconfiguration\n");
             abort();
         }
-        if (!sf_native_video_configure((uint32)x0, (uint32)x1,
-                (uint32)y0, (uint32)y1, interlace))
+        if (!sf_native_video_configure((uint32)x0, (uint32)x1, (uint32)y0, (uint32)y1, interlace))
             abort();
     }
 }
@@ -469,7 +467,7 @@ uint32 sf_native_reset_callbacks(void)
         abort();
     }
     ResetCallbackPSX();
-    psx_bios_bind_guest_callback_service(sf_native_video_callback, NULL);
+    psx_bios_bind_guest_callback_service(sf_native_guest_callback, NULL);
     psx_root_counter_bind(0x8010F33Cu, 0u);
     w_u16(0x1F801074u, 0u);
     w_u16(0x1F801070u, 0u);
@@ -497,9 +495,8 @@ uint32 sf_native_reset_callbacks(void)
     profile.dot_divider = 1u;
     psx_vblank_bind(NULL, NULL, 0u);
     VSyncCallback(NULL);
-    if (!sf_native_video_bind(&profile, 0u) ||
-        !psx_vblank_bind_guest(0x8010F378u, 0x8010F358u,
-            sf_native_video_callback, NULL))
+    sf_card_poll_field = 0u;
+    if (!sf_native_video_bind(&profile, 0u) || !psx_vblank_bind_guest(0x8010F378u, 0x8010F358u, sf_native_video_callback, NULL))
         abort();
     sf_video_pal = pal;
     sf_video_initialized = 1u;
@@ -511,16 +508,16 @@ uint32 sf_native_reset_callbacks(void)
 
 void sf_native_init_graph(uint32 width, uint32 height, uint32 flags, uint32 dither, uint32 rgb24)
 {
-    const GpuPsyqStateBinding binding = {
-        0x8010F484u, 0x8010F428u, 0x8010F418u,
-        0x8010F41Bu, 0x8010F3B8u, 0u
-    };
+    const GpuPsyqStateBinding binding = {0x8010F484u, 0x8010F428u, 0x8010F418u, 0x8010F41Bu, 0x8010F3B8u, 0u};
     DRAWENV *draw = (DRAWENV *)sf_draft_guest_ptr(0x8012F038u);
     DISPENV *display = (DISPENV *)sf_draft_guest_ptr(0x8012F098u);
     if (!gpu_bind_psyq_state(&binding) || ResetGraph((flags >> 4u & 3u) == 3u ? 3 : 0) < 0)
         abort();
     w_u8(0x8010F418u, 0u);
     w_u8(0x8010F419u, 1u);
+    /* Publish original SDK VRAM bounds from the reviewed GPU-kind tables */
+    w_u16(0x8010F41Cu, r_u16(0x8010F498u + 4u * r_u8(0x8010F418u)));
+    w_u16(0x8010F41Eu, r_u16(0x8010F4A4u + 4u * r_u8(0x8010F418u)));
     memset(sf_draft_guest_ptr(0x8010F428u), 0xff, 92u);
     memset(sf_draft_guest_ptr(0x8010F484u), 0xff, 20u);
     memset(draw, 0, 28u);
@@ -572,7 +569,8 @@ void sf_native_init_graph(uint32 width, uint32 height, uint32 flags, uint32 dith
     w_u16(0x8012C7B0u, 0u);
     w_u16(0x8012C7B2u, 0u);
     w_u16(0x80130F0Au, 0u);
-    if (!width) abort();
+    if (!width)
+        abort();
     w_u16(0x80130EE8u, (uint16)((sint16)((height << 14u) / width) / 3));
     w_u16(0x80130F08u, 0u);
     w_u8(0x8012541Bu, 3u);
@@ -612,6 +610,7 @@ void sub_800E8E94(void)
 
 void sf_native_continuation_enter(void);
 void sf_native_continuation_leave(void);
+
 void sub_800E9024(void)
 {
     uint32 index = (uint32)(sint32)r_s16(0x8013C5B4u);
@@ -684,6 +683,7 @@ void sub_800EC904(uint32 seed)
 }
 
 uint32 sf_draft_call(uint32 target, uint32 argc, const uint32 *args);
+
 void sf_native_set_vsync(uint32 callback)
 {
     /* The original registration function replaces VBlank table slot zero */
@@ -692,9 +692,7 @@ void sf_native_set_vsync(uint32 callback)
 
 void sf_native_cdcontrol(uint32 command, uint32 parameter, uint32 result)
 {
-    if (!CdControl((uint8)command,
-        parameter ? (uint8 *)sf_draft_guest_ptr(parameter) : NULL,
-        result ? (uint8 *)sf_draft_guest_ptr(result) : NULL))
+    if (!CdControl((uint8)command, parameter ? (uint8 *)sf_draft_guest_ptr(parameter) : NULL, result ? (uint8 *)sf_draft_guest_ptr(result) : NULL))
     {
         fprintf(stderr, "Native CD command %u failed\n", command);
         abort();
@@ -740,15 +738,11 @@ sint32 sub_800E5ED4(sint32 packet, sint32 dfe, sint32 dtd, uint16 page, sint32 w
 {
     uint32 texture = 0u;
     uint32 address = (uint32)window;
-    uint32 mode = 0xE1000000u | (dtd ? 0x200u : 0u) |
-        (dfe ? 0x400u : 0u) | ((uint32)page & 0x9FFu);
+    uint32 mode = 0xE1000000u | (dtd ? 0x200u : 0u) | (dfe ? 0x400u : 0u) | ((uint32)page & 0x9FFu);
     w_u8((uint32)packet + 3u, 2u);
     w_u32((uint32)packet + 4u, mode);
     if (address)
-        texture = 0xE2000000u | ((uint32)(r_u8(address + 2u) >> 3) << 15) |
-            ((uint32)(r_u8(address) >> 3) << 10) |
-            (((0u - (uint32)(sint32)r_s16(address + 6u)) & 255u) >> 3 << 5) |
-            (((0u - (uint32)(sint32)r_s16(address + 4u)) & 255u) >> 3);
+        texture = 0xE2000000u | ((uint32)(r_u8(address + 2u) >> 3) << 15) | ((uint32)(r_u8(address) >> 3) << 10) | (((0u - (uint32)(sint32)r_s16(address + 6u)) & 255u) >> 3 << 5) | (((0u - (uint32)(sint32)r_s16(address + 4u)) & 255u) >> 3);
     w_u32((uint32)packet + 8u, texture);
     return (sint32)texture;
 }

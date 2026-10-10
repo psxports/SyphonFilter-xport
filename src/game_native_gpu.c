@@ -7,10 +7,7 @@ void sf_native_graphics_require_idle(void);
 
 static void sf_gpu_bind_state(void)
 {
-    const GpuPsyqStateBinding binding = {
-        0x8010F484u, 0x8010F428u, 0x8010F418u,
-        0x8010F41Bu, 0x8010F3B8u, 0u
-    };
+    const GpuPsyqStateBinding binding = {0x8010F484u, 0x8010F428u, 0x8010F418u, 0x8010F41Bu, 0x8010F3B8u, 0u};
     if (!gpu_bind_psyq_state(&binding))
         abort();
 }

@@ -1,4 +1,5 @@
 #include "game_draft.h"
+#include "psx_gpu.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -8,7 +9,6 @@ uint32 sub_800EC8D4(uint32 destination, uint32 source, uint32 size)
     memcpy(sf_draft_guest_ptr(destination), sf_draft_guest_ptr(source), size);
     return destination;
 }
-
 
 void sf_native_cd_poll(void);
 void sf_native_continuation_safepoint(void);
@@ -31,8 +31,7 @@ sint32 sf_native_video_bind(const PsxCrtcState *initial, uint32 status)
         return 0;
     memset(&next, 0, sizeof(next));
     next.crtc = *initial;
-    next.irq.lines = (initial->scanline < initial->vertical_start ||
-        initial->scanline >= initial->vertical_end) ? 1u : 0u;
+    next.irq.lines = (initial->scanline < initial->vertical_start || initial->scanline >= initial->vertical_end) ? 1u : 0u;
     if (!psx_video_timing_validate(&next))
         return 0;
     sf_video = next;
@@ -50,6 +49,7 @@ sint32 sf_native_video_bind(const PsxCrtcState *initial, uint32 status)
 void sf_native_video_poll(void)
 {
     uint64 now, elapsed, ticks;
+    uint32 present_field = 0u;
     if (!sf_video_bound)
     {
         fprintf(stderr, "Unbound native video timing\n");
@@ -59,6 +59,7 @@ void sf_native_video_poll(void)
         return;
     sf_native_continuation_enter();
     sf_video_polling = 1u;
+    xport_poll();
     now = xport_timer_get();
     elapsed = now >= sf_video_last_us ? now - sf_video_last_us : 0u;
     sf_video_last_us = now;
@@ -79,6 +80,7 @@ void sf_native_video_poll(void)
         sf_video_counter = (sf_video_counter + step.hblanks) & 0xFFFFu;
         if (step.vblanks)
         {
+            present_field = 1u;
             if (sf_video_status & 0x400000u)
                 sf_video_status ^= 0x80000000u;
             /* Canonical delivery owns audio, pads and the registered native callback */
@@ -87,8 +89,14 @@ void sf_native_video_poll(void)
                 abort();
         }
     }
+    if (present_field && !gpu_present())
+    {
+        fprintf(stderr, "SF: Native frame presentation failed\n");
+        abort();
+    }
     sf_video_polling = 0u;
     sf_native_cd_poll();
+    sf_native_mdec_poll();
     sf_native_continuation_leave();
 }
 
@@ -103,8 +111,7 @@ sint32 sf_native_video_timing_sample(uint32 *timer1, uint32 *gpu_status)
 }
 
 /* Display updates preserve SDK counters and the running field phase */
-sint32 sf_native_video_configure(uint32 horizontal_start, uint32 horizontal_end,
-    uint32 vertical_start, uint32 vertical_end, uint32 interlace)
+sint32 sf_native_video_configure(uint32 horizontal_start, uint32 horizontal_end, uint32 vertical_start, uint32 vertical_end, uint32 interlace)
 {
     PsxVideoTiming next;
     if (!sf_video_bound || sf_video_polling || interlace > 1u)
@@ -115,8 +122,7 @@ sint32 sf_native_video_configure(uint32 horizontal_start, uint32 horizontal_end,
     next.crtc.horizontal_end = horizontal_end;
     next.crtc.vertical_start = vertical_start;
     next.crtc.vertical_end = vertical_end;
-    next.irq.lines = (next.crtc.scanline < vertical_start ||
-        next.crtc.scanline >= vertical_end) ? 1u : 0u;
+    next.irq.lines = (next.crtc.scanline < vertical_start || next.crtc.scanline >= vertical_end) ? 1u : 0u;
     if (!psx_video_timing_validate(&next))
         return 0;
     sf_video = next;
@@ -148,8 +154,7 @@ uint32 sub_800E3F54(sint32 mode)
     sf_native_video_wait(target);
     saved_status = sf_video_status;
     sf_native_video_wait(r_u32(0x8010F378u) + 1u);
-    while ((saved_status & 0x400000u) &&
-        !((saved_status ^ sf_video_status) & 0x80000000u))
+    while ((saved_status & 0x400000u) && !((saved_status ^ sf_video_status) & 0x80000000u))
         sf_native_video_wait(r_u32(0x8010F378u) + 1u);
     w_u32(0x8010E24Cu, r_u32(0x8010F378u));
     w_u32(0x8010E248u, sf_video_counter);
@@ -157,8 +162,7 @@ uint32 sub_800E3F54(sint32 mode)
 }
 
 /* The original sprite sorter links a guest packet and advances its cursor */
-static uint32 sf_native_sort_box_packet(uint32 packet, uint32 ordering_table,
-    uint16 depth, uint8 words)
+static uint32 sf_native_sort_box_packet(uint32 packet, uint32 ordering_table, uint16 depth, uint8 words)
 {
     sint32 index = (sint32)((uint32)depth - r_u32(ordering_table + 8u));
     uint32 slot;
@@ -179,8 +183,7 @@ void sub_800E81D4(uint32 box, uint32 ordering_table, uint16 depth)
     if ((sint32)flags < 0)
         return;
     packet = r_u32(0x8012C8A0u);
-    w_u32(packet + 4u, ((flags >> 17) & 0x180u) |
-        ((flags >> 23) & 0x60u) | 0xE1000200u);
+    w_u32(packet + 4u, ((flags >> 17) & 0x180u) | ((flags >> 23) & 0x60u) | 0xE1000200u);
     w_u8(packet + 8u, *SF_DRAFT_PTR(uint8, box + 12u));
     w_u8(packet + 9u, *SF_DRAFT_PTR(uint8, box + 13u));
     w_u8(packet + 11u, (uint8)(((flags >> 29) & 2u) | 0x60u));
@@ -237,7 +240,8 @@ static void sf_native_rotation_trig(sint16 angle, sint32 *sine, sint32 *cosine)
     uint32 index = angle < 0 ? 0u - (uint32)(sint32)angle : (uint32)angle;
     uint32 packed = r_u32(0x801103F8u + 4u * (index & 0xFFFu));
     *sine = (sint16)packed;
-    if (angle < 0) *sine = -*sine;
+    if (angle < 0)
+        *sine = -*sine;
     *cosine = (sint16)(packed >> 16);
 }
 
@@ -256,14 +260,16 @@ uint32 sub_800EBE94(uint32 angles, uint32 output)
     xport_store_le16(matrix + 6u, (uint16)sf_native_rotation_product(sz, cx));
     xport_store_le16(matrix + 8u, (uint16)sf_native_rotation_product(cz, cx));
     intermediate = sf_native_rotation_product(sy, sx);
-    xport_store_le16(matrix, (uint16)((uint32)sf_native_rotation_product(cy, cz) +
-        (uint32)sf_native_rotation_product(intermediate, sz)));
-    xport_store_le16(matrix + 2u, (uint16)((uint32)sf_native_rotation_product(intermediate, cz) -
-        (uint32)sf_native_rotation_product(cy, sz)));
+    xport_store_le16(matrix, (uint16)((uint32)sf_native_rotation_product(cy, cz) + (uint32)sf_native_rotation_product(intermediate, sz)));
+    xport_store_le16(matrix + 2u, (uint16)((uint32)sf_native_rotation_product(intermediate, cz) - (uint32)sf_native_rotation_product(cy, sz)));
     intermediate = sf_native_rotation_product(cy, sx);
-    xport_store_le16(matrix + 14u, (uint16)((uint32)sf_native_rotation_product(sy, sz) +
-        (uint32)sf_native_rotation_product(intermediate, cz)));
-    xport_store_le16(matrix + 12u, (uint16)((uint32)sf_native_rotation_product(intermediate, sz) -
-        (uint32)sf_native_rotation_product(sy, cz)));
+    xport_store_le16(matrix + 14u, (uint16)((uint32)sf_native_rotation_product(sy, sz) + (uint32)sf_native_rotation_product(intermediate, cz)));
+    xport_store_le16(matrix + 12u, (uint16)((uint32)sf_native_rotation_product(intermediate, sz) - (uint32)sf_native_rotation_product(sy, cz)));
     return output;
+}
+
+// FUNCTION_MARKER: SCUS_942.40.DEP 0x800CB5B8
+void sub_800CB5B8(sint16 depth, sint32 config)
+{
+    w_u32(0x80116458u, ((uint32)config << 16) + (uint32)(sint32)depth);
 }

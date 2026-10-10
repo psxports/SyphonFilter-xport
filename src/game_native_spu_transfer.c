@@ -113,3 +113,9 @@ failure:
     sub_800FB064(0);
     return -1;
 }
+
+sint32 sub_800FE7B4(sint16 mode)
+{
+    FUNCTION_MARKER(0x800FE7B4u, "SCUS_942.40");
+    return (sint16)sub_800FE7E4(mode);
+}

@@ -13,8 +13,11 @@ void *sf_draft_guest_ptr(uint32 address);
 uint32 sf_draft_guest_address(const void *pointer);
 uint32 sf_draft_carry_add(uint64 left, uint64 right, uint32 width);
 uint32 sf_draft_call(uint32 target, uint32 argc, const uint32 *args);
+uint32 sf_character_event_read(uint32 address, uint32 width);
+void sf_character_event_write(uint32 address, uint32 value, uint32 width);
 void sf_gte_write_data(uint32 index, uint32 value);
 uint32 sf_gte_read_data(uint32 index);
+uint32 sf_gte_color_02(void);
 sint32 sf_gte_execute(uint32 command);
 __declspec(noreturn) void _break(uint32 code, uint32 subcode);
 __declspec(noreturn) void sf_draft_unbound_stack_field(uint32 function, uint32 offset);
@@ -33,16 +36,16 @@ __declspec(noreturn) void sf_draft_unbound_stack_field(uint32 function, uint32 o
 #define WORDn(value, index) (((uint16 *)&(value))[index])
 #define DWORDn(value, index) (((uint32 *)&(value))[index])
 #ifdef LOBYTE
-#undef LOBYTE
+    #undef LOBYTE
 #endif
 #ifdef HIBYTE
-#undef HIBYTE
+    #undef HIBYTE
 #endif
 #ifdef LOWORD
-#undef LOWORD
+    #undef LOWORD
 #endif
 #ifdef HIWORD
-#undef HIWORD
+    #undef HIWORD
 #endif
 #define LOBYTE(value) BYTEn(value, 0)
 #define HIBYTE(value) BYTEn(value, sizeof(value) - 1)

@@ -9,8 +9,7 @@ static uint32 sf_protected_active;
 static uint32 sf_protected_cancel_pending;
 static uint32 sf_continuation_guards;
 
-void sf_native_protected_callback(uint32 target, uint8 mode,
-    uint32 cancellation, uint32 argument)
+void sf_native_protected_callback(uint32 target, uint8 mode, uint32 cancellation, uint32 argument)
 {
     if (sf_protected_active || sf_continuation_guards || !target)
     {

@@ -1,5 +1,25 @@
 #ifndef SF_GAME_DRAFT_SIGNATURES_H
-#define SF_GAME_DRAFT_SIGNATURES_H
+    #define SF_GAME_DRAFT_SIGNATURES_H
+uint32 sub_80148770(void);
+void sub_80148740(uint32 enabled);
+sint32 sub_8002234C(uint32 resource);
+sint32 sub_80082234(uint32 resource, uint32 object);
+void sub_8002B38C(uint32 event_address);
+void sub_8014F818(uint32 entity, sint32 type);
+void sub_80090624(uint32 event_address);
+void sub_8014FA84(uint32 entity, sint32 type);
+void sub_8002AFF0(uint32 event_address);
+void sub_8014F5CC(uint32 entity, sint32 type);
+void sub_8002EB38(uint32 event_address);
+sint32 sub_801469E8(void);
+void sub_80150C64(uint32 entity, sint32 type);
+void sub_8008FD64(uint32 event_address);
+void sub_8014F444(uint32 entity, sint32 type);
+
+/* Reviewed main dependency reached during PARK initialization */
+uint32 sub_800686E4(uint32 value);
+uint32 sub_800686F4(uint32 value);
+uint32 sub_8006D6E0(uint32 first, uint32 second);
 
 /* Unverified draft signatures agreed before translation */
 uint32 sub_8013F4E0(uint32 mode);
@@ -118,6 +138,8 @@ sint32 sub_8003FE58(void);
 sint32 sub_80078BD0(uint32 a1, uint32 a2);
 sint32 sub_80084698(sint32 a1);
 sint32 sub_80038098(uint32 a1);
+uint64 sub_800FEFE4(sint32 value);
+sint32 sub_800FF284(uint32 left_low, uint32 left_high, uint32 right_low, uint32 right_high);
 sint32 sub_80072F84(uint32 a1, sint32 a2, sint32 a3, uint32 a4, uint32 a9, uint32 a10);
 sint32 sub_800DC40C(uint32 a1, uint32 a2, sint32 a3);
 sint32 sub_80057BB4(sint32 a1, sint32 a2, sint32 a3, sint32 a4);
@@ -225,7 +247,7 @@ sint32 sub_80029CC4(uint32 a1);
 sint32 sub_800DEC7C(sint32 a1);
 sint32 sub_800E0FE8(sint32 a1, uint32 a2);
 sint32 sub_80030EEC(sint32 a1);
-uint32 sub_80086050(sint32 a1);
+void sub_80086050(uint32 head);
 sint32 sub_800482B8(uint32 a1, uint32 a2);
 sint32 sub_800C8218(sint32 a1, uint32 a2);
 uint32 sub_8002833C(sint32 a1, sint32 a2, sint32 a3, sint32 a4);
@@ -233,7 +255,8 @@ sint32 sub_800171A8(uint32 a1, sint32 a2, sint32 a3);
 sint32 sub_80048210(sint32 a1, uint32 a2);
 sint32 sub_800D9738(uint32 a1, uint32 a2);
 uint32 sub_800CCB40(void);
-uint32 sub_8004008C(void);
+uint32 sub_8004008C(uint32 incoming_v0);
+uint32 sub_80040088(void);
 sint32 sub_800D89D8(sint32 a1);
 sint32 sub_80067448(uint32 a1, sint32 a2, uint32 a3);
 uint32 sub_800D3CB4(uint32 packed_color, uint32 increment, uint32 channel_mask);
@@ -382,7 +405,7 @@ sint32 sub_80036A1C(sint32 a1);
 sint32 sub_8004308C(unsigned __int8 a1);
 void sub_8006784C(sint32 a1, sint32 a2, sint32 a3, uint32 a4, uint32 a9);
 void sub_800D5B50(uint32 polygon, uint32 *cursor, uint32 ordering_table, uint32 depth_flags);
-void sub_8002337C(uint32 a1, sint32 a2);
+void sub_8002337C(uint32 a1);
 sint32 sub_800959EC(uint32 a1, uint32 a2, uint32 a3, uint32 a4);
 void sub_8002C3E8(sint32 a1);
 sint32 sub_8003352C(sint32 a1, unsigned __int8 a2);
@@ -435,7 +458,7 @@ sint32 sub_800493F0(sint32 a1, sint8 a2, unsigned __int8 a3);
 sint32 sub_8002BF74(sint32 a1, sint32 a2);
 void sub_800C6F44(uint32 _$A0);
 sint32 sub_80094DEC(uint32 a1, sint32 a2, sint32 a3, sint32 a4, uint32 a9, sint32 a10, sint32 a11, uint32 a12);
-void sub_800C6510(sint32 a1);
+void sub_800C6510(sint32 a1, uint32 initial_palette, sint32 accumulator);
 uint32 sub_80030FA4(sint32 a1);
 void sub_800D1924(uint32 _$A0);
 sint32 sub_8006FC48(sint32 a1);
@@ -504,7 +527,8 @@ sint32 sub_8002254C(sint32 a1, uint32 a2);
 sint32 sub_800D97D4(uint32 a1, sint32 a2, uint32 a3);
 sint32 sub_800CB424(sint32 a1, sint32 a2, uint32 a3);
 sint32 sub_8003CED0(uint32 a1);
-uint32 sub_8003FB14(void);
+uint32 sub_8003FB14(uint32 incoming_v0);
+uint32 sub_8003FB0C(void);
 sint32 sub_80077A18(uint32 a1, uint32 a2);
 sint32 sub_8008BD14(void);
 sint32 sub_800C8C8C(sint32 a1, sint32 a2);
@@ -546,11 +570,11 @@ sint32 sub_80083750(sint32 a1, sint16 a2, sint16 a3);
 sint32 sub_80069BF8(sint16 a1, sint32 a2, sint32 a3);
 sint32 sub_80069980(sint16 a1);
 sint32 sub_800D8930(sint32 a1, sint32 a2, uint32 a3);
-sint32 sub_80029D88(void);
+void sub_80029D88(void);
 sint32 sub_800C1234(sint32 a1, sint32 a2, sint16 a3, sint16 a4);
 sint32 sub_800CACF0(sint32 a1, uint32 a2);
 sint32 sub_800CFDB0(sint32 a1, sint32 a2);
-uint32 sub_800401A0(void);
+uint32 sub_800401A0(sint16 start, sint16 limit, uint32 callback);
 uint32 sub_800834D8(void);
 sint32 sub_80091AF0(sint16 entity, sint32 status);
 uint32 sub_800DE6E0(uint32 a1, uint32 a2);
@@ -575,7 +599,7 @@ sint32 sub_8007FFD0(uint32 a1, uint32 a2);
 sint32 sub_800DA52C(uint32 a1, uint32 a2);
 sint32 sub_80025B90(sint16 a1, sint32 a2);
 sint32 sub_80028A98(sint32 a1);
-void sub_800D57A4(void);
+uint32 sub_800D57A4(uint32 fourth_sxy, uint32 primitive_kind);
 sint32 sub_800196E4(uint32 a1, uint32 a2);
 sint32 sub_8008BB2C(void);
 sint32 sub_800CCC08(sint32 a1, sint32 a2);
@@ -610,7 +634,7 @@ sint32 sub_8006AF74(uint32 a1);
 sint32 sub_800826C0(void);
 sint32 sub_80073CD8(sint32 a1, sint8 a2, sint32 a3, sint8 a4);
 sint32 sub_80073D30(sint32 a1, sint8 a2, sint32 a3, sint8 a4);
-void sub_800D5624(void);
+void sub_800D5624(uint32 scratch, sint16 output[4]);
 sint32 sub_8003566C(sint32 a1);
 uint32 sub_800D84E8(uint32 *output, uint32 port);
 sint32 sub_8006E54C(sint32 a1, sint32 a2, uint32 a3);
@@ -639,15 +663,16 @@ sint32 sub_800C2F28(sint32 a1);
 sint32 sub_800CDAB0(void);
 sint32 sub_8004BE10(sint32 a1);
 uint32 sub_800D7AAC(void);
-sint32 sub_800CD9F4(void);
+sint32 sub_800CD9F4(uint32 callback);
+void sub_800CB5B8(sint16 depth, sint32 config);
 uint32 sub_800CB61C(void);
-sint32 sub_800628C8(uint32 a1);
+void sub_800628C8(uint32 a1);
 sint32 sub_800DBF98(sint32 a1, sint32 a2);
 sint32 sub_800CDA74(sint8 a1);
 sint32 sub_80077FA0(sint32 a1);
 sint32 sub_800CF9E8(sint32 a1);
 sint32 sub_800CB580(uint32 a1, uint32 a2);
-sint32 sub_800C6F08(unsigned __int16 a1, sint32 a2, sint32 _$A2);
+sint32 sub_800C6F08(uint16 x, sint32 y, sint32 z);
 sint32 sub_8006C824(void);
 sint32 sub_800D94C8(uint32 a1, uint32 a2);
 sint32 sub_800C2FF4(void);
@@ -724,7 +749,7 @@ sint32 sub_8014D7AC(sint32 a1);
 sint32 sub_800D0F08(sint32 a1, sint32 a2, sint8 a3);
 sint32 sub_800734E4(sint32 a1, sint32 a2, uint32 a3, sint32 a4, sint32 a9, uint32 a10);
 sint32 sub_80044008(unsigned __int8 a1);
-void sub_8003C0B0(void);
+void sub_8003C0B0(sint32 index, uint32 position);
 sint32 sub_80062220(sint32 a1);
 sint32 sub_80077278(sint32 A0, sint32 a2, uint32 a3, sint32 a4);
 sint32 sub_80095464(uint32 a1, uint32 a2, sint32 a3);
@@ -902,7 +927,7 @@ sint32 sub_8001D924(uint32 a1);
 uint32 sub_8003E87C(void);
 sint32 sub_80019630(sint32 angle, uint32 output);
 sint32 sub_800DF3B0(sint32 a1);
-sint32 sub_80016994(void);
+void sub_80016994(void);
 void sub_80015B68(const char *filename, uint32 buffered);
 uint32 sub_800D8DE8(uint32 a1, sint32 a2);
 sint32 sub_800C610C(uint32 a1);
@@ -918,7 +943,7 @@ sint32 sub_800C5E64(void);
 void sub_80087194(sint32 a1);
 uint32 sub_80077B84(sint32 a1, sint32 a2);
 sint32 sub_80032BA8(sint16 a1, sint32 a2);
-sint32 sub_8008BAB8(sint32 a1, uint32 a2);
+sint32 sub_8008BAB8(uint32 output, uint32 format, uint32 unit, uint32 detail, uint32 completed, uint32 total);
 uint32 sub_800282C4(sint32 a1, sint32 a2, sint32 a3);
 sint32 sub_8003545C(sint32 a1);
 sint32 sub_8001B51C(void);
@@ -942,6 +967,9 @@ sint32 sub_800C82B8(void);
 void sub_800CC678(sint32 a1, sint16 a2);
 sint32 sub_800E0C00(uint32 a1, uint32 a2);
 sint32 sub_800BF02C(void);
+sint32 sub_800E027C(uint32 first, uint32 second, uint32 output);
+sint32 sub_800E95D4(sint32 light, uint32 descriptor);
+sint32 sub_800FE7B4(sint16 mode);
 sint32 sub_8006C12C(unsigned __int8 a1);
 void sub_800C6EAC(uint32 A0, uint32 a2);
 sint32 sub_800C64C0(unsigned __int8 a1, sint32 a2);
@@ -990,7 +1018,7 @@ sint32 sub_800C7A58(sint32 a1);
 uint32 sub_800C6264(void);
 sint32 sub_80020180(sint8 a1);
 sint32 sub_8002462C(sint16 a1, sint32 a2, sint32 a3);
-uint32 sub_800E4250(uint32 callback_table);
+uint32 sub_800E4250(uint32 callback_table, uint32 slot, uint32 callback);
 sint32 sub_800C8148(uint32 a1, sint32 a2, sint32 a3, sint32 a4);
 sint32 sub_800E9C14(sint32 a1);
 sint32 sub_800DFCD0(uint32 a1);
@@ -1055,7 +1083,9 @@ sint32 sub_8001CC64(uint8 a1, sint32 a2, uint32 a3, sint32 a4, sint8 a9);
 sint32 sub_80020210(void);
 void sub_80020724(uint32 slot, sint32 priority, sint32 type, uint32 payload, uint32 external_transform, uint32 position);
 sint32 sub_80022994(sint32 a1);
+uint32 sub_8002B2C0(uint32 event_address);
 sint32 sub_800229F0(sint32 a1, sint32 a2, uint32 a3);
+sint32 sub_80022AA8(sint32 entity, sint32 index);
 void sub_80024C8C(sint32 a1);
 sint32 sub_80027094(uint32 a1, uint32 a2, sint32 a3, sint32 a4, uint32 output);
 void sub_8002AF78(sint32 a1);
@@ -1156,6 +1186,20 @@ uint32 sub_800EC894(uint32 destination, uint32 source);
 uint32 sub_800EC8F4(void);
 void sub_800EC904(uint32 seed);
 sint32 sub_800EC914(const char *format, ...);
+sint32 sub_800E9B44(sint32 mode);
+void sub_800E9BC4(uint32 descriptor);
+void sub_800EB8BC(sint32 dqa);
+void sub_800EB8C8(uint32 dqb);
+void sub_800EB8E4(uint32 red, uint32 green, uint32 blue);
+void sf_native_cd_reset_data_fifo(void);
+sint32 sub_80148F78(void);
+void sub_80148CD4(sint32 selection);
+sint32 sub_80147B90(void);
+sint32 sub_80148230(sint32 action);
+sint32 sf_native_get_table(sint32 *address, sint32 *count, uint32 *flags);
+uint32 sub_800E5DC4(uint32 packet, uint32 rectangle);
+uint32 sub_800E63B0(sint16 x, sint16 y);
+uint32 sub_800E6448(sint16 x, sint16 y);
 sint32 sub_800EC924(uint32 destination, uint32 format, ...);
 uint32 sub_800ED5AC(uint32 callback);
 sint32 sub_800ED5C0(uint8 a1, sint32 a2, sint32 a3);
@@ -1222,4 +1266,245 @@ sint32 sub_800FE3E4(uint32 source, uint16 bank);
 sint32 sub_800FE594(uint32 source, uint32 bytes, sint16 bank);
 uint32 sub_800FE724(uint32 source, uint32 bytes);
 uint32 sub_800F2124(sint32 selector, uint32 address);
+uint32 sub_80044870(void);
+uint32 sub_80044E68(void);
+uint32 sub_80044900(void);
+void sub_800C7940(sint32 value);
+sint32 sub_80147924(void);
+sint32 sub_800E5184(uint32 rectangle, uint8 red, uint8 green, uint8 blue);
+void sub_8013F52C(void);
+void sub_80140ED0(void);
+void sub_801410B0(void);
+sint32 sub_800F2474(uint32 event_class, uint32 specification, uint32 mode, uint32 guest_callback);
+sint32 sub_800F2484(uint32 handle);
+void sub_80141360(void);
+sint32 sub_800FE894(uint32 handle);
+uint32 sub_800E4248(uint32 slot, uint32 callback);
+uint32 sub_800E4958(uint32 slot, uint32 callback);
+void sub_80147B0C(uint32 value);
+sint32 sub_80148474(void);
+sint32 sub_8014775C(uint32 value);
+uint32 sub_80149558(void);
+void sub_801473A4(sint32 x, sint32 y, sint32 z, sint32 w);
+void sub_80149154(void);
+sint32 sub_800D7A14(uint32 result);
+sint32 sub_8013F060(uint32 destination);
+void sub_800ED284(uint32 source, uint32 sectors);
+void sub_800F0704(void);
+void sub_800F08D4(uint32 mode, uint32 start_frame, uint32 end_frame, uint32 complete_callback, uint32 limit_callback);
+void sub_8013E9D0(sint32 value);
+
+void sub_8013EC90(uint32 mode);
+uint32 sub_800E41E4(uint32 channel, uint32 callback);
+uint32 sub_8013EC6C(uint32 source);
+
+void sub_80140D70(void);
+
+uint32 sub_80140FC8(void);
+
+sint32 sub_800E8AC4(uint16 width, uint16 height, uint32 flags, uint8 dither, uint16 rgb24);
+sint32 sub_800E8B2C(uint16 width, uint16 height);
+
+void sub_800E9494(sint16 x0, sint16 y0, sint16 x1, sint16 y1);
+
+sint32 sub_80149880(void);
+
+sint32 sub_8013D8A0(void);
+
+sint32 sub_8013E01C(void);
+
+sint32 sub_8013DBD0(uint32 *first, uint32 *second);
+uint32 sub_800F0A54(uint32 *payload, uint32 *header);
+
+sint32 sub_8013D830(void);
+
+sint32 sf_file_cancel_before_location_reset(sint8 mode, uint32 reset_handle);
+sint32 sf_file_cancel_before_movie_dispose(uint32 handle);
+sint32 sf_movie_pause_before_dispose(uint32 handle);
+sint32 sub_8013F7F8(uint32 argument);
+void sub_80140EE0(uint32 callback);
+void sub_80140F5C(void);
+sint32 sub_8013F860(uint32 state);
+sint32 sub_8013F624(uint32 state);
+sint32 sub_80140E50(sint32 card);
+uint32 sub_80141618(void);
+sint32 sub_80141468(void);
+uint32 sub_80140D1C(sint32 status);
+void sub_80149328(void);
+void sub_801486A8(void);
+void sub_80147A70(void);
+void sub_8013F57C(void);
+uint32 sub_80140FF4(void);
+uint32 sub_80141044(void);
+void sub_801412AC(void);
+uint32 sub_8014D5A0(void);
+uint32 sub_8014D744(uint32 end);
+sint32 sub_80148070(sint32 value);
+sint32 sub_80147C34(uint32 message, sint32 mode, uint32 unused, uint32 callback);
+
+sint32 sub_800ED558(sint32 mode, uint32 result);
+
+sint32 sub_800F0654(uint32 mode);
+void sf_native_cd_set_stream_owner(uint32 enabled);
+
+sint32 sub_8013D8E8(uint32 header, sint32 x, sint32 y, uint32 buffer, sint32 remaining, sint32 count, uint32 mode, uint32 rect, uint32 block_rect, uint32 buffers, uint32 block_bytes, uint32 extra_buffers, uint32 extra_bytes);
+
+sint32 sub_800D8B38(uint32 *descriptor_output);
+
+sint32 sub_8013DDE0(uint32 payload, uint32 destination);
+uint32 sub_8013EB28(uint32 payload);
+sint32 sub_8013F180(uint32 payload, uint32 output, uint32 table);
+uint32 sub_800F0964(uint32 payload);
+
+sint32 sub_8013E154(void);
+
+sint32 sub_8013DE64(uint32 payload, uint32 block_words, uint32 mode, uint32 index_address, uint32 buffers);
+
+void sub_8013EB34(uint32 payload, sint32 mode);
+void sub_8013EBB0(uint32 output, sint32 words);
+
+void sub_8013DF00(void);
+
+void sf_native_mdec_poll(void);
+sint32 sub_8013E7BC(void);
+
+sint32 sub_8013E4E0(void);
+
+sint32 sub_8013E83C(void);
+
+uint32 sub_80148B1C(void);
+
+uint32 sub_80027DF8(void);
+
+sint32 sub_800F4E24(sint32 sequence, sint32 track, sint32 bank, uint32 data);
+uint32 sub_800F4D74(sint32 sequence, sint32 track);
+uint32 sub_800F2C94(uint32 data, sint32 bank, sint32 tracks);
+uint32 sub_800F2C64(sint32 sequence, sint32 track, uint32 callback);
+uint32 sub_800F27A4(sint32 sequence, sint32 track, uint32 mask);
+
+sint32 sub_800FD36C(sint16 sequence_track);
+
+sint32 sub_80147C08(void);
+
+uint32 sub_800F7AFC(sint32 sequence, sint16 track, uint16 left, uint16 right);
+uint32 sub_800FCCF4(sint16 sequence_track, sint16 left, sint16 right);
+
+uint32 sub_800F5B44(sint32 sequence, sint32 track, sint8 mode, sint8 repeats);
+uint32 sub_800F594C(sint16 sequence, sint16 track, sint8 mode, sint16 repeats);
+
+uint32 sub_8013F5BC(uint32 value);
+
+sint32 sub_800FDAB4(uint16 bank, sint16 program);
+
+uint32 sub_80082358(void);
+uint32 sub_80152D6C(void);
+
+void sub_800CD808(sint32 first, sint32 second);
+
+void sub_800CD818(sint16 value);
+
+sint32 sub_8014C500(uint8 embedded);
+
+uint32 sub_8005FC80(uint32 index);
+
+void sub_80150F78(uint32 records, sint32 count);
+uint32 sub_80150FBC(void);
+
+sint32 sub_80056588(void);
+
+uint32 sub_80032730(void);
+
+void sub_80152EEC(uint32 sectors_per_block, uint8 preload);
+
+void sub_8015421C(void);
+
+void sub_800223BC(uint32 mode);
+void sub_800223CC(uint32 mode);
+uint32 sub_800E7FC4(uint32 packet, uint32 rectangle, uint32 x, uint32 y);
+
+uint32 sub_80068704(void);
+
+uint32 sub_800167EC(void);
+
+sint32 sub_8014D118(void);
+
+uint32 sub_800172B4(sint16 index);
+
+sint32 sub_8014CC70(void);
+
+void sub_800D0D90(uint32 resource);
+
+uint32 sub_800EC874(uint32 destination, uint32 source);
+
+uint32 sub_80150E9C(uint32 record, sint32 kind);
+
+uint32 sub_8014C94C(sint16 index, uint32 animation);
+uint32 sub_800170D8(sint32 index, uint32 output);
+sint32 sub_8014EB54(uint32 record);
+uint32 sub_8015389C(uint32 record, uint8 mode);
+
 #endif
+sint32 sub_8014EE38(uint32 record, sint32 kind);
+sint32 sub_80153D88(uint32 record, uint32 output);
+void sub_800CB554(uint32 object);
+uint32 sub_800EAC44(sint32 input);
+
+uint32 sub_800EC68C(uint32 matrix, uint32 input, uint32 output);
+
+sint32 sub_80153A50(uint32 record);
+
+void sub_80024278(uint32 value);
+
+sint32 sub_8014FD78(uint32 record, sint32 kind);
+
+void sub_8014E748(uint32 record, sint32 x, sint32 y, sint32 z);
+void sub_8014E804(uint32 record, sint32 x, sint32 y, sint32 z);
+sint32 sub_80150148(uint32 record);
+uint32 sub_8008C844(uint32 record);
+void sub_8014E8C0(uint32 record, sint32 span);
+sint32 sub_80017390(void);
+sint32 sub_8007E6A8(void);
+sint32 sub_801537AC(void);
+void sub_80153578(void);
+uint32 sub_80093530(void);
+void sub_800922B8(void);
+void sub_80027C4C(void);
+
+uint32 sub_8001745C(uint32 value);
+uint32 sub_8001746C(uint32 value);
+uint32 sub_8001747C(uint32 value);
+uint32 sub_80046A54(uint32 value);
+uint32 sub_80046A64(uint32 value);
+sint32 sub_8014E0CC(sint32 phase);
+void sub_801476D4(void);
+uint32 sub_800CDB34(uint32 callback);
+uint32 sub_80147F8C(void);
+void sub_80147138(void);
+void sub_8014F6D0(uint32 entity);
+void sub_8008EDEC(uint32 event_address);
+void sub_800912A4(uint32 event_address);
+void sub_8015037C(uint32 entity, sint32 type);
+void sub_8002AD54(uint32 event_address);
+void sub_8014F400(uint32 entity);
+void sub_8002AB34(uint32 event_address);
+void sub_8014F344(uint32 entity, sint32 type);
+void sub_8014F04C(uint32 entity, sint32 type);
+uint32 sub_8008E22C(uint32 entity);
+void sub_8014EED8(uint32 entity);
+void sf_subway_80147144(uint32 event_address);
+uint32 sf_subway_80148ED0(void);
+uint32 sub_800CC7C4(uint32 first_field, uint32 second_field, uint8 mode, uint8 kind, sint32 priority);
+sint32 sub_8005A17C(void);
+uint32 sf_subway_80146CF0(uint32 near_range, uint32 far_range, sint32 duration, sint32 mode, sint32 rate);
+sint32 sf_subway_80147D88(uint32 entity_index);
+void sub_8015050C(sint16 entity_index);
+sint32 sub_8006C874(uint32 entity_index);
+uint32 sub_8006C9A0(uint32 expected_type, uint32 entity_index);
+uint32 sf_subway_80146DA0(uint32 entity);
+uint32 sub_8002D2F8(uint32 entity_index, sint32 expected_type);
+uint32 sf_subway_80148BAC(sint16 entity_index);
+uint32 sub_80022024(uint8 enabled);
+uint32 sub_800220D4(uint32 mode);
+uint32 sub_80021FC4(void);
+uint32 sf_subway_80146C18(void);
+uint32 sf_subway_80147C68(void);

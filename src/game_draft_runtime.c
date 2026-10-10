@@ -13,11 +13,7 @@ extern uint32 sf_gte_read_data(uint32 index);
 extern sint32 sf_gte_execute(uint32 command);
 
 /* Native tokens occupy segments rejected by the PSX memory bus */
-static const uint32 sf_native_tags[10] = {
-    0x20000000u, 0x30000000u, 0x40000000u, 0x50000000u,
-    0x60000000u, 0x70000000u, 0xc0000000u, 0xd0000000u,
-    0xe0000000u, 0xf0000000u
-};
+static const uint32 sf_native_tags[10] = {0x20000000u, 0x30000000u, 0x40000000u, 0x50000000u, 0x60000000u, 0x70000000u, 0xc0000000u, 0xd0000000u, 0xe0000000u, 0xf0000000u};
 static uintptr_t sf_native_windows[10];
 static uint32 sf_native_window_count;
 static SRWLOCK sf_native_lock = SRWLOCK_INIT;
@@ -128,8 +124,7 @@ static void sf_draft_geometry_controls(uint32 control[32])
         {
             uint32 first = pair * 2u;
             uint32 second = first + 1u;
-            control[bases[matrix] + pair] = (uint16)matrices[matrix]->m[first / 3u][first % 3u]
-                | ((uint32)(uint16)matrices[matrix]->m[second / 3u][second % 3u] << 16);
+            control[bases[matrix] + pair] = (uint16)matrices[matrix]->m[first / 3u][first % 3u] | ((uint32)(uint16)matrices[matrix]->m[second / 3u][second % 3u] << 16);
         }
         control[bases[matrix] + 4u] = (uint32)(sint32)matrices[matrix]->m[2][2];
     }
@@ -627,7 +622,6 @@ void sf_draft_geometry_800CEDA4_stage6(sint32 *output1, sint32 input2, sint32 in
     sf_draft_geometry_write_control(10u, (uint32)input4);
     sf_draft_geometry_write_control(11u, (uint32)input5);
     sf_draft_geometry_write_control(12u, (uint32)*output1);
-
 }
 
 void sf_draft_geometry_800CEDA4_stage7(sint32 input1, sint32 input2, sint32 input3, sint32 input4, sint32 input5, uint32 memory6, uint32 memory7, uint32 memory8, sint32 *output9, sint32 *output10, sint32 *output11)
@@ -1369,7 +1363,9 @@ __declspec(noreturn) void sf_draft_unbound_stack_field(uint32 function, uint32 o
     fprintf(stderr, "Unbound original stack field: function %08X, frame offset %X\n", function, offset);
     abort();
 }
+
 void sf_native_protected_callback(uint32 target, uint8 mode, uint32 cancellation, uint32 argument);
+
 void sf_draft_saved_callback(uint32 target, uint8 mode, uint32 cancellation, uint32 argument)
 {
     sf_native_protected_callback(target, mode, cancellation, argument);

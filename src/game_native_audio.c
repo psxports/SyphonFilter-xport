@@ -10,10 +10,7 @@ static uint32 sf_audio_fresh_cold;
 
 static void sf_audio_bind_transfer(void)
 {
-    const SpuNativeTransferGuestBinding binding = {
-        0x80115168u, 0x80115114u, 0x80115110u, 0x8011512Cu,
-        0x80115130u, 0x8011514Cu, 0x80115150u, 3u
-    };
+    const SpuNativeTransferGuestBinding binding = {0x80115168u, 0x80115114u, 0x80115110u, 0x8011512Cu, 0x80115130u, 0x8011514Cu, 0x80115150u, 3u};
     if (!spu_bind_native_transfer_guest(&binding))
     {
         fprintf(stderr, "SF: Cannot bind native SPU transfer owner\n");
@@ -85,7 +82,6 @@ uint32 sub_800FE504(uint32 address)
     return result;
 }
 
-
 uint32 sub_800F2A94(void)
 {
     uint32 voice, i, block;
@@ -103,8 +99,7 @@ uint32 sub_800F2A94(void)
     {
         memset(&attr, 0, sizeof(attr));
         attr.voice = 1u << voice;
-        attr.mask = SPU_VOICE_VOLL | SPU_VOICE_VOLR | SPU_VOICE_PITCH |
-            SPU_VOICE_WDSA | SPU_VOICE_ADSR_ADSR1 | SPU_VOICE_ADSR_ADSR2 | SPU_VOICE_LSAX;
+        attr.mask = SPU_VOICE_VOLL | SPU_VOICE_VOLR | SPU_VOICE_PITCH | SPU_VOICE_WDSA | SPU_VOICE_ADSR_ADSR1 | SPU_VOICE_ADSR_ADSR2 | SPU_VOICE_LSAX;
         attr.volume.left = (sint16)r_u16(0x80115624u);
         attr.volume.right = (sint16)r_u16(0x80115626u);
         attr.pitch = r_u16(0x80115628u);
@@ -160,10 +155,7 @@ uint32 sub_800F2A94(void)
 
 uint32 sub_800FB004(sint32 count, uint32 table)
 {
-    const SpuMallocGuestBinding binding = {
-        0x80115120u, 0x80115128u, 0x801151D8u, 0x801151DCu,
-        0x801151E0u, 0x80115170u, 0x80115174u
-    };
+    const SpuMallocGuestBinding binding = {0x80115120u, 0x80115128u, 0x801151D8u, 0x801151DCu, 0x801151E0u, 0x80115170u, 0x80115174u};
     uint32 result;
     if (count <= 0)
         return 0u;
@@ -205,6 +197,7 @@ void sub_800FC2F4(void)
 }
 
 static uint32 sf_audio_noise_mask;
+
 static uint32 sf_audio_noise_mask_operation(sint32 mode, uint32 mask)
 {
     uint32 next = sf_audio_noise_mask;
@@ -326,7 +319,7 @@ void sub_800FACB4(sint32 voice_count)
     uint32 i, record;
     sint32 count = (sint8)voice_count;
     SpuVoiceAttr attr;
-    static const uint8 zero_halfwords[] = {4,6,8,12,18,20,30,32,34,36,38,42,44,46,48,50};
+    static const uint8 zero_halfwords[] = {4, 6, 8, 12, 18, 20, 30, 32, 34, 36, 38, 42, 44, 46, 48, 50};
     sub_800FB064(0);
     w_u16(0x8012CA48u, 0u);
     sub_800FB004(32, 0x801278A0u);
@@ -656,8 +649,7 @@ uint32 sub_800E41B4(sint32 irq, uint32 callback)
     w_u16(0x1F801074u, (uint16)(mask & ~0x40u));
     if (sf_audio_timer_event != -1)
     {
-        if (!DisableEventPSX((uint32)sf_audio_timer_event) ||
-            !CloseEventPSX((uint32)sf_audio_timer_event))
+        if (!DisableEventPSX((uint32)sf_audio_timer_event) || !CloseEventPSX((uint32)sf_audio_timer_event))
             abort();
         sf_audio_timer_event = -1;
     }
@@ -845,8 +837,7 @@ static uint16 sf_vab_read16(const uint8 *data)
 
 static uint32 sf_vab_read32(const uint8 *data)
 {
-    return (uint32)data[0] | ((uint32)data[1] << 8) |
-        ((uint32)data[2] << 16) | ((uint32)data[3] << 24);
+    return (uint32)data[0] | ((uint32)data[1] << 8) | ((uint32)data[2] << 16) | ((uint32)data[3] << 24);
 }
 
 static void sf_vab_write16(uint8 *data, uint16 value)
@@ -866,7 +857,6 @@ static void sf_vab_write32(uint8 *data, uint32 value)
 /* FUNCTION_MARKER: 800FDFFC */
 uint32 sub_800FDFFC(uint32 size, uint32 base)
 {
-    (void)size;
     return base;
 }
 
@@ -959,8 +949,7 @@ sint32 sub_800FE004(uint32 header, sint32 requested_bank, uint32 allocator, uint
     for (i = 0u; i <= sample_count; ++i)
     {
         running += sizes[i];
-        sf_vab_write16(programs + (i / 2u) * 16u + ((i & 1u) ? 14u : 12u),
-            (uint16)((base + running) >> 3));
+        sf_vab_write16(programs + (i / 2u) * 16u + ((i & 1u) ? 14u : 12u), (uint16)((base + running) >> 3));
     }
     w_u32(0x8013C648u + (uint32)bank * 4u, running);
     w_u8(0x80130FF8u + (uint32)bank, 2u);
@@ -979,4 +968,12 @@ no_bank:
 sint32 sub_800FDF94(uint32 header, sint16 bank, uint32 spu_base)
 {
     return (sint16)sub_800FE004(header, bank, 0x800FDFFCu, spu_base);
+}
+
+/* FUNCTION_MARKER: 800C2C68 */
+sint32 sub_800C2C68(void)
+{
+    w_u16(SF_DRAFT_GP + 0x790u, 0u);
+    w_u16(SF_DRAFT_GP + 0x798u, 0u);
+    return sub_800F9AA4(0, 0);
 }

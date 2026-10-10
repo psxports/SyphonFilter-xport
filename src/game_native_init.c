@@ -47,8 +47,7 @@ sint32 sub_801539A0(uint8 common)
     for (index = 0u; index < 8u; ++index)
     {
         sint32 stage = r_s16(0x80130C88u);
-        w_u32(0x8013C6B0u + index * 4u,
-            r_u32(0x8010ACC0u + (uint32)stage * 32u + index * 4u));
+        w_u32(0x8013C6B0u + index * 4u, r_u32(0x8010ACC0u + (uint32)stage * 32u + index * 4u));
     }
     return sub_800171A8(0x8013C6B0u, (sint32)0x80127DC0u, 150);
 }

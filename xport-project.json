@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Syphon Filter",
+  "short_name": "SF",
+  "toolset": "C:\\Projects\\xports\\xport\\tools",
+  "paths": {
+    "status": "status",
+    "project_tools": "tools",
+    "analysis_database": "status/analysis.sqlite",
+    "native_executable": "bin/SF.exe",
+    "native_debug_executable": "bin/SF_debug.exe",
+    "native_working_directory": "bin",
+    "native_solution": "src/platform/win/SF.sln",
+    "native_build": "_build",
+    "ida_exports": "orig/images",
+    "ida_configs": "tools/ida",
+    "sdk_classification": "status/ghidra/classification.json",
+    "disc_image": "iso/Syphon Filter (USA) (v1.0).cue",
+    "music_source": "iso",
+    "music_output": "bin/MUSIC",
+    "original_executable": "orig/SCUS_942.40"
+  },
+  "duckstation": {
+    "host": "127.0.0.1",
+    "gdb_port": 2430,
+    "reserved_gdb_ports": {
+      "user": 2430,
+      "lockstep": 2431
+    },
+    "default_role": "user",
+    "data_directory": "tools/duckstation/data/user",
+    "data_directories": {
+      "user": "tools/duckstation/data/user",
+      "lockstep": "tools/duckstation/data/lockstep"
+    }
+  },
+  "lockstep": {
+    "schema": 1,
+    "enabled": true,
+    "original_image": "SCUS_942.40",
+    "native_configuration": "Debug",
+    "native_platform": "x86",
+    "msbuild_property": "LockstepDebug=true",
+    "source_roots": [
+      "src"
+    ],
+    "max_events": 1000000,
+    "memory": {
+      "dram_size": 2097152,
+      "scratchpad_size": 1024
+    },
+    "devices": {
+      "vram": "trusted_wrapper",
+      "spu_ram": "trusted_wrapper"
+    },
+    "runtime": {
+      "duckstation_role": "lockstep",
+      "record_role": "user",
+      "native_arguments": [
+        "--lockstep-replay"
+      ]
+    }
+  },
+  "code_refresh": {
+    "build": {
+      "solution": "src/platform/win/SF.sln",
+      "configuration": "Debug",
+      "platform": "x86",
+      "process_name": "SF_debug.exe"
+    },
+    "tests": [],
+    "artifacts": []
+  },
+  "analysis": {
+    "images": [
+      "SCUS_942.40",
+      "INIT.OVL",
+      "MOVIE.OVL",
+      "TITLE.OVL",
+      "SCUS_942.40.DEP",
+      "INIT.DEP.OVL",
+      "MOVIE.DEP.OVL",
+      "TITLE.DEP.OVL",
+      "MOVIE.EXTRA.OVL",
+      "PARK.OVL",
+      "TITLE.MAIN.OVL",
+      "INIT.MAIN.OVL",
+      "MENU.MAIN.OVL"
+    ],
+    "default_image": "SCUS_942.40"
+  },
+  "capabilities": {
+    "redbook_audio": {
+      "enabled": false,
+      "reason": "Reviewed CUE contains no AUDIO tracks"
+    }
+  },
+  "coverage_permissions": {
+    "allow_unverified_translation": false,
+    "allow_missing_bios_stubs": true,
+    "allow_missing_sdk_stubs": true
+  }
+}

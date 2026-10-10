@@ -17,11 +17,7 @@ uint32 sf_native_reset_callbacks(void);
 void xport_main(void)
 {
     /* Initialize the executable image and CRT memory layout */
-    const PSX_EXE executable = {
-        "DATA/SCUS_942.40", 0x80010000u,
-        0x80116628u, 0x8013D630u,
-        0x8010E210u, 0x8013D630u, 0x006BA9C8u
-    };
+    const PSX_EXE executable = {"DATA/SCUS_942.40", 0x80010000u, 0x80116628u, 0x8013D630u, 0x8010E210u, 0x8013D630u, 0x006BA9C8u};
     if (!xport_psx_exe_load(&executable))
     {
         fprintf(stderr, "Cannot load DATA/SCUS_942.40\n");
@@ -61,7 +57,7 @@ uint32 sub_800D7A4C(uint16 *screen_x, uint16 *screen_y);
 uint32 sub_80015850(const char *filename, uint32 destination_slot_guest, uint32 size);
 uint32 sub_80015A00(const char *filename, uint32 destination, uint32 buffered);
 void sub_80015B68(const char *filename, uint32 buffered);
-void sf_native_main_sprintf(char * destination, const char * format, const char * level_name);
+void sf_native_main_sprintf(char *destination, const char *format, const char *level_name);
 uint32 sub_800C794C(void);
 sint32 sub_80149CF4(void);
 sint32 sub_8014D7AC(sint32 phase);
@@ -164,108 +160,108 @@ initialize:
         goto transition;
     for (;;)
     {
-        if (xport_isquit()) return;
+        if (xport_isquit())
+            return;
         w_u32(0x801169A4u, r_u32(0x801169A4u) + 1u);
         sub_800D837C();
         switch (r_u32(0x80115C78u))
         {
-        case 3u:
-            if (r_u8(0x80141A20u) == 0u)
-                sub_8001629C();
-            else
-                sub_80015364(4u, 5u, 0xFFFEu, 0xFFFEu, 0u, 0u, 0u, 0u);
-            break;
-        case 0u:
-        case 5u:
-            sub_80014FF8();
-            {
-                uint32 count = r_u32(0x801163B4u);
-                uint32 object = r_u32(0x80116B9Cu);
-                w_u32(0x801163B4u, count + 1u);
-                sub_800489F8(object);
-            }
-            break;
-        case 4u:
-            sub_80149CF4();
-            break;
-        case 7u:
-            sub_80145ACC();
-            {
-                uint32 phase = r_u32(0x80115C78u);
-                if (phase == 7u)
-                    sub_8008294C(0u);
+            case 3u:
+                if (r_u8(0x80141A20u) == 0u)
+                    sub_8001629C();
                 else
+                    sub_80015364(4u, 5u, 0xFFFEu, 0xFFFEu, 0u, 0u, 0u, 0u);
+                break;
+            case 0u:
+            case 5u:
+                sub_80014FF8();
                 {
-                    w_u32(0x80115C78u, 0u);
-                    sub_80082724();
-                    w_u32(0x80115C78u, phase);
+                    uint32 count = r_u32(0x801163B4u);
+                    uint32 object = r_u32(0x80116B9Cu);
+                    w_u32(0x801163B4u, count + 1u);
+                    sub_800489F8(object);
                 }
-            }
-            break;
-        case 8u:
-            sub_800D84E8(&pad_address, 0u);
-            {
-                uint32 aligned = pad_address + 4u;
-                uint32 active = 0u;
-                if (r_u8(pad_address) != 0xFFu)
+                break;
+            case 4u:
+                sub_80149CF4();
+                break;
+            case 7u:
+                sub_80145ACC();
                 {
-                    uint32 bit = 6u;
-                    if ((aligned & 3u) != 0u)
+                    uint32 phase = r_u32(0x80115C78u);
+                    if (phase == 7u)
+                        sub_8008294C(0u);
+                    else
                     {
-                        bit += (aligned & 3u) << 3;
-                        aligned &= 0xFFFFFFFCu;
-                    }
-                    active = r_u32(aligned + ((bit >> 5) << 2)) & (1u << (bit & 31u));
-                }
-                if (active != 0u || r_u8(0x80116AF0u) != 0u)
-                {
-                    uint32 handle = sub_80086EA0(r_u16(0x8015469Cu), 0x80115C68u);
-                    sub_80086018(handle & 0xFFFFu);
-                    sub_80084C30(r_u8(0x80115F16u));
-                    sub_8003B030();
-                    w_u16(0x8015469Cu, 0xFFFFu);
-                    w_u8(0x80115F16u, 0xFFu);
-                    sub_800CB000(sub_800DE3FC());
-                    uint32 demo = r_u8(0x80116AF0u);
-                    w_u32(0x801169C4u, 0u);
-                    if (demo != 0u)
-                    {
-                        uint32 level_index = (uint32)(sint32)(sint16)r_u16(0x80130C88u);
-                        uint32 level_name = r_u32(0x80102D1Cu + (level_index << 2));
-                        w_u32(0x801169C4u, 0x80145630u);
-                        sf_native_main_sprintf(filename, (const char *)psx_addr(0x80010000u, 1u), (const char *)psx_addr(level_name, 1u));
-                        sub_80015850(filename, 0x801169C4u, 0x1000u);
-                    }
-                    sub_80016094();
-                }
-                else
-                    sub_80086830();
-                uint32 tick = r_u32(0x801169A4u);
-                if ((tick & 15u) == 0u)
-                {
-                    uint32 sound = r_u16(0x8015469Cu);
-                    if (sound != 0xFFFFu)
-                    {
-                        uint32 pulse = (tick & 16u) >> 4;
-                        sub_80086E44(sound, (200u * pulse) & 0xFFu, (200u * pulse) & 0xFFu, (255u * pulse) & 0xFFu);
+                        w_u32(0x80115C78u, 0u);
+                        sub_80082724();
+                        w_u32(0x80115C78u, phase);
                     }
                 }
-            }
-            break;
-        case 9u:
-            sub_80048A70(r_u32(0x80116B9Cu));
-            w_u16(0x8012D97Au, r_u16(0x8012D97Au) & 0xFFFEu);
-            sub_8008294C(0u);
-            sub_80015DC8();
-            break;
-        default:
-            break;
+                break;
+            case 8u:
+                sub_800D84E8(&pad_address, 0u);
+                {
+                    uint32 aligned = pad_address + 4u;
+                    uint32 active = 0u;
+                    if (r_u8(pad_address) != 0xFFu)
+                    {
+                        uint32 bit = 6u;
+                        if ((aligned & 3u) != 0u)
+                        {
+                            bit += (aligned & 3u) << 3;
+                            aligned &= 0xFFFFFFFCu;
+                        }
+                        active = r_u32(aligned + ((bit >> 5) << 2)) & (1u << (bit & 31u));
+                    }
+                    if (active != 0u || r_u8(0x80116AF0u) != 0u)
+                    {
+                        uint32 handle = sub_80086EA0(r_u16(0x8015469Cu), 0x80115C68u);
+                        sub_80086018(handle & 0xFFFFu);
+                        sub_80084C30(r_u8(0x80115F16u));
+                        sub_8003B030();
+                        w_u16(0x8015469Cu, 0xFFFFu);
+                        w_u8(0x80115F16u, 0xFFu);
+                        sub_800CB000(sub_800DE3FC());
+                        uint32 demo = r_u8(0x80116AF0u);
+                        w_u32(0x801169C4u, 0u);
+                        if (demo != 0u)
+                        {
+                            uint32 level_index = (uint32)(sint32)(sint16)r_u16(0x80130C88u);
+                            uint32 level_name = r_u32(0x80102D1Cu + (level_index << 2));
+                            w_u32(0x801169C4u, 0x80145630u);
+                            sf_native_main_sprintf(filename, (const char *)psx_addr(0x80010000u, 1u), (const char *)psx_addr(level_name, 1u));
+                            sub_80015850(filename, 0x801169C4u, 0x1000u);
+                        }
+                        sub_80016094();
+                    }
+                    else
+                        sub_80086830();
+                    uint32 tick = r_u32(0x801169A4u);
+                    if ((tick & 15u) == 0u)
+                    {
+                        uint32 sound = r_u16(0x8015469Cu);
+                        if (sound != 0xFFFFu)
+                        {
+                            uint32 pulse = (tick & 16u) >> 4;
+                            sub_80086E44(sound, (200u * pulse) & 0xFFu, (200u * pulse) & 0xFFu, (255u * pulse) & 0xFFu);
+                        }
+                    }
+                }
+                break;
+            case 9u:
+                sub_80048A70(r_u32(0x80116B9Cu));
+                w_u16(0x8012D97Au, r_u16(0x8012D97Au) & 0xFFFEu);
+                sub_8008294C(0u);
+                sub_80015DC8();
+                break;
+            default:
+                break;
         }
         uint32 y_adjust = r_u16(0x8011658Eu);
         sint32 x_signed = (sint16)r_u16(0x8011658Cu);
         uint32 x_adjust = r_u16(0x8011658Cu);
-        if ((x_signed < 0 ? -x_signed : x_signed) >= 17 ||
-            ((sint16)y_adjust < 0 ? -(sint32)(sint16)y_adjust : (sint32)(sint16)y_adjust) >= 17)
+        if ((x_signed < 0 ? -x_signed : x_signed) >= 17 || ((sint16)y_adjust < 0 ? -(sint32)(sint16)y_adjust : (sint32)(sint16)y_adjust) >= 17)
         {
             y_adjust = 0u;
             x_adjust = 0u;
@@ -520,58 +516,58 @@ uint32 sub_800EDBA4(void)
     }
     switch (interrupt)
     {
-    case 1u:
-        if (error != 0u && count == 1u)
-            error = 0u;
-        w_u8(0x80114F9Du, error ? 5u : 1u);
-        for (uint32 i = 0u; i < 8u; ++i)
-            w_u8(0x80125450u + i, response[i]);
-        w_u8(r_u32(0x80114F84u), 0u);
-        w_u8(r_u32(0x80114F90u), 0u);
-        return 4u;
-    case 2u:
-        w_u8(0x80114F9Cu, error ? 5u : 2u);
-        for (uint32 i = 0u; i < 8u; ++i)
-            w_u8(0x80125448u + i, response[i]);
-        return 2u;
-    case 3u:
-        if (error != 0u)
-        {
-            w_u8(0x80114F9Cu, 5u);
+        case 1u:
+            if (error != 0u && count == 1u)
+                error = 0u;
+            w_u8(0x80114F9Du, error ? 5u : 1u);
+            for (uint32 i = 0u; i < 8u; ++i)
+                w_u8(0x80125450u + i, response[i]);
+            w_u8(r_u32(0x80114F84u), 0u);
+            w_u8(r_u32(0x80114F90u), 0u);
+            return 4u;
+        case 2u:
+            w_u8(0x80114F9Cu, error ? 5u : 2u);
             for (uint32 i = 0u; i < 8u; ++i)
                 w_u8(0x80125448u + i, response[i]);
             return 2u;
-        }
-        if (r_u32(0x80114D84u + 4u * r_u8(0x80114CDDu)) != 0u)
-        {
-            w_u8(0x80114F9Cu, 3u);
+        case 3u:
+            if (error != 0u)
+            {
+                w_u8(0x80114F9Cu, 5u);
+                for (uint32 i = 0u; i < 8u; ++i)
+                    w_u8(0x80125448u + i, response[i]);
+                return 2u;
+            }
+            if (r_u32(0x80114D84u + 4u * r_u8(0x80114CDDu)) != 0u)
+            {
+                w_u8(0x80114F9Cu, 3u);
+                for (uint32 i = 0u; i < 8u; ++i)
+                    w_u8(0x80125448u + i, response[i]);
+                return 1u;
+            }
+            w_u8(0x80114F9Cu, 2u);
             for (uint32 i = 0u; i < 8u; ++i)
                 w_u8(0x80125448u + i, response[i]);
-            return 1u;
-        }
-        w_u8(0x80114F9Cu, 2u);
-        for (uint32 i = 0u; i < 8u; ++i)
-            w_u8(0x80125448u + i, response[i]);
-        return 2u;
-    case 4u:
-        w_u8(0x80114F9Eu, 4u);
-        w_u8(0x80114F9Du, r_u8(0x80114F9Eu));
-        for (uint32 i = 0u; i < 8u; ++i)
-            w_u8(0x80125458u + i, response[i]);
-        for (uint32 i = 0u; i < 8u; ++i)
-            w_u8(0x80125450u + i, response[i]);
-        return 4u;
-    case 5u:
-        w_u8(0x80114F9Du, 5u);
-        w_u8(0x80114F9Cu, r_u8(0x80114F9Du));
-        for (uint32 i = 0u; i < 8u; ++i)
-            w_u8(0x80125448u + i, response[i]);
-        for (uint32 i = 0u; i < 8u; ++i)
-            w_u8(0x80125450u + i, response[i]);
-        return 6u;
-    default:
-        sf_native_cd_puts(0x8001407Cu);
-        sf_native_cd_printf_interrupt(0x80014090u, interrupt);
-        return 0u;
+            return 2u;
+        case 4u:
+            w_u8(0x80114F9Eu, 4u);
+            w_u8(0x80114F9Du, r_u8(0x80114F9Eu));
+            for (uint32 i = 0u; i < 8u; ++i)
+                w_u8(0x80125458u + i, response[i]);
+            for (uint32 i = 0u; i < 8u; ++i)
+                w_u8(0x80125450u + i, response[i]);
+            return 4u;
+        case 5u:
+            w_u8(0x80114F9Du, 5u);
+            w_u8(0x80114F9Cu, r_u8(0x80114F9Du));
+            for (uint32 i = 0u; i < 8u; ++i)
+                w_u8(0x80125448u + i, response[i]);
+            for (uint32 i = 0u; i < 8u; ++i)
+                w_u8(0x80125450u + i, response[i]);
+            return 6u;
+        default:
+            sf_native_cd_puts(0x8001407Cu);
+            sf_native_cd_printf_interrupt(0x80014090u, interrupt);
+            return 0u;
     }
 }
